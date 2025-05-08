@@ -324,12 +324,18 @@ button:disabled {
 
 .documents-wrapper {
     display: flex;
-    flex-wrap: wrap; /* Cho phép các thẻ xuống hàng nếu không đủ chỗ */
-    gap: 10px; /* Khoảng cách giữa các thẻ */
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 16px;
+    max-width: 900px;   /* Giới hạn chiều rộng tối đa */
+    margin: 0 auto;     /* Căn giữa wrapper */
+    width: 100%;
 }
 
 .relevant-document {
-    padding: 5px;
+    flex: 1 1 0;
+    min-width: 0;
     background-color: #f9f9f9;
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -339,6 +345,9 @@ button:disabled {
     text-overflow: ellipsis;
     white-space: nowrap;
     transition: transform 0.3s ease;
+    padding: 12px;
+    margin: 0;
+    box-sizing: border-box;
 }
 
 .relevant-document:hover {

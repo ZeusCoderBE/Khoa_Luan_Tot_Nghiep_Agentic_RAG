@@ -163,8 +163,10 @@ function processResponse(data) {
 
     // Gọi typeMessage để hiển thị từng từ của câu trả lời
     typeMessage($botMessage.find(".message"), formattedAnswer, () => {
-        // Sau khi hoàn thành việc hiển thị câu trả lời, gọi hàm hiển thị tài liệu liên quan
-        displayRelevantDocuments(lst_Relevant_Documents);
+        // Kiểm tra nếu lst_Relevant_Documents tồn tại và không rỗng
+        if (lst_Relevant_Documents && lst_Relevant_Documents.length > 0) {
+            displayRelevantDocuments(lst_Relevant_Documents);
+        }
     });
 }
 
@@ -204,15 +206,15 @@ function displayRelevantDocuments(documents) {
     container.append(documentsWrapper);
 
     documents.forEach((doc, index) => {
-        // // Giới hạn nội dung hiển thị (ví dụ: 100 ký tự đầu tiên)
-        // const shortContent = doc.length > 100 ? doc.substring(0, 100) + '...' : doc;
+        // Giới hạn nội dung hiển thị (ví dụ: 100 ký tự đầu tiên)
+        const shortContent = doc.length > 100 ? doc.substring(0, 100) + '...' : doc;
 
-        // // Tạo thẻ cho document
-        // const docElement = $(`
-        //     <div class="relevant-document" data-full-content="${doc}">
-        //         ${shortContent}
-        //     </div>
-        // `);
+        // Tạo thẻ cho document
+        const docElement = $(`
+            <div class="relevant-document" data-full-content="${doc}">
+                ${shortContent}
+            </div>
+        `);
 
         // Lấy phần metadata từ chuỗi trích dẫn tài liệu
         const parts = doc.split('<=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=>');
