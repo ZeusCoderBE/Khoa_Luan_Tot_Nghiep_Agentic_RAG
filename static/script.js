@@ -1,28 +1,34 @@
 // Hàm thao tác với sidebar
 function toggleSidebar() {
     const $sidebar = $('.sidebar');
-    const $sidebarContent = $('.sidebar-content');
     const $toggleButton = $('.toggle-button');
-    const $header = $('.header');
-
-    if ($sidebar.width() === 300) {
-        // Thu nhỏ sidebar
-        $sidebar.css('width', '0');
-        $sidebarContent.hide();
-        $toggleButton.attr('title', 'Open sidebar');
-
-        // Di chuyển toggle-button vào header khi sidebar đóng
-        $header.append($toggleButton);
+    const $newChat = $('#new-chat');
+    if ($sidebar.hasClass('sidebar-collapsed')) {
+        $sidebar.removeClass('sidebar-collapsed');
+        $('.sidebar-content').show();
+        $toggleButton.attr('title', 'Close Sidebar');
+        $newChat.attr('title', 'New Chat');
     } else {
-        // Phóng to sidebar
-        $sidebar.css('width', '300px');
-        $sidebarContent.show();
-        $toggleButton.attr('title', 'Close sidebar');
-
-        // Di chuyển toggle-button vào sidebar khi mở
-        $sidebar.append($toggleButton);
+        $sidebar.addClass('sidebar-collapsed');
+        $('.sidebar-content').hide();
+        $toggleButton.attr('title', 'Open Sidebar');
+        $newChat.removeAttr('title');
     }
 }
+
+// Đặt title đúng trạng thái khi load trang
+$(document).ready(function() {
+    const $sidebar = $('.sidebar');
+    const $toggleButton = $('.toggle-button');
+    const $newChat = $('#new-chat');
+    if ($sidebar.hasClass('sidebar-collapsed')) {
+        $toggleButton.attr('title', 'Open Sidebar');
+        $newChat.removeAttr('title');
+    } else {
+        $toggleButton.attr('title', 'Close Sidebar');
+        $newChat.attr('title', 'New Chat');
+    }
+});
 
 const $userInput = $('#user-query');
 const $sendButton = $('#send-button');
@@ -533,4 +539,5 @@ function deleteChatSession(sessionId) {
         }
     });
 }
+
 

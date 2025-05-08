@@ -14,11 +14,26 @@ body {
 }
 
 .sidebar {
-    background-color: #F9F9F9; /* Nền trắng cho thanh #171717 */
-    width: 300px; /* Thay đổi kích thước thanh sidebar */
+    background-color: #F9F9F9;
+    width: 300px;
+    min-width: 48px;
     transition: width 0.3s;
     position: relative;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Thêm bóng đổ cho sidebar */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    z-index: 2;
+}
+
+.sidebar-collapsed {
+    width: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+    overflow: hidden;
+}
+.sidebar-collapsed .sidebar-content {
+    display: none !important;
+}
+.sidebar-collapsed .sidebar-header {
+    justify-content: center;
 }
 
 .sidebar-content {
@@ -478,4 +493,18 @@ button:disabled {
 .sidebar-content {
     margin-top: 10px;
     padding: 0 10px;
+}
+
+.sidebar-collapsed .chatbot-header-law,
+.sidebar-collapsed #new-chat {
+    display: none !important;
+}
+
+.sidebar-collapsed .toggle-button {
+    margin: 0 auto;
+    display: block;
+    left: 0;
+    right: 0;
+    position: relative;
+    top: 10px;
 }
