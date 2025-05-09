@@ -373,15 +373,53 @@ function loadChatSessions() {
                     ? firstMessage.substring(0, 30) + "..." 
                     : firstMessage;
 
-                const sessionElement = $(`
-                    <div class="chat-session" data-session-id="${session.id}">
+                // Thêm icon ba chấm và menu Delete
+                const sessionElement = $(
+                    `<div class="chat-session" data-session-id="${session.id}">
                         <div class="chat-session-content">${truncatedMessage}</div>
-                    </div>
-                `);
+                        <div class="session-menu-trigger">⋯</div>
+                        <div class="session-menu">
+                            <div class="session-menu-item delete-session">
+                                <svg class="delete-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24"><path fill="#d00" d="M9 3a3 3 0 0 1 6 0h5a1 1 0 1 1 0 2h-1v15a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V5H4a1 1 0 1 1 0-2h5Zm8 2H7v15a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V5Zm-5 3a1 1 0 0 1 1 1v8a1 1 0 1 1-2 0V9a1 1 0 0 1 1-1Zm4 1a1 1 0 0 1 2 0v8a1 1 0 1 1-2 0V9Zm-8 0a1 1 0 0 1 2 0v8a1 1 0 1 1-2 0V9Z"/></svg>
+                                Delete
+                            </div>
+                        </div>
+                    </div>`
+                );
 
-                // Gắn sự kiện click để load lịch sử chat
-                sessionElement.on('click', function() {
+                // Gắn sự kiện click để load lịch sử chat cho toàn bộ thẻ (trừ icon ba chấm và menu)
+                sessionElement.on('click', function(e) {
+                    // Nếu click vào menu hoặc icon ba chấm thì không load
+                    if ($(e.target).hasClass('session-menu-trigger') || $(e.target).closest('.session-menu').length) return;
                     loadChatHistory(session.id);
+                });
+
+                // Hiện menu khi click vào ba chấm
+                sessionElement.find('.session-menu-trigger').on('click', function(e) {
+                    e.stopPropagation();
+                    const $menu = $(this).siblings('.session-menu');
+                    // Nếu menu đang hiện, ẩn nó đi. Nếu đang ẩn, ẩn tất cả menu khác và hiện menu này.
+                    if ($menu.is(':visible')) {
+                        $menu.hide();
+                    } else {
+                        $('.session-menu').hide();
+                        $menu.show();
+                    }
+                });
+
+                // Ẩn menu khi click ra ngoài
+                $(document).on('click', function() {
+                    $('.session-menu').hide();
+                });
+
+                // Xử lý xóa phiên chat
+                sessionElement.find('.delete-session').on('click', function(e) {
+                    e.stopPropagation();
+                    if (confirm('Bạn có chắc chắn muốn xóa phiên chat này?')) {
+                        const sessionId = session.id;
+                        deleteChatSession(sessionId); // Gọi hàm xóa phiên chat
+                        sessionElement.remove(); // Xóa khỏi giao diện
+                    }
                 });
 
                 $chatSessions.append(sessionElement);
