@@ -6,10 +6,10 @@ class Extract_Information():
     def __init__(self,bert:Bert_Extract):
         self.bert=bert
     def predict(self,contexts, question):
-        lst_Answer_Final = []  
+        lst_Answer_Final = {}  
         question=ViTokenizer.tokenize(question)
         try:
-            for context in contexts:
+            for idx,(context) in enumerate(contexts):
                 context=ViTokenizer.tokenize(context)
                 inputs = self.bert.tokenizer(
                 question,
@@ -49,10 +49,10 @@ class Extract_Information():
                 if answers:
                     answers.sort(key=lambda x: x["score"], reverse=True)
                     best_answer = answers[0]['text']
-                    lst_Answer_Final.append(best_answer.replace("_"," "))
-                else: 
-                    return "Không có câu trả lời"
+                    lst_Answer_Final[idx] = best_answer.replace("_", " ")
+                else:
+                    lst_Answer_Final[idx] = "Không có câu trả lời"
         except Exception as e:
             print(f"Lỗi xảy ra: {e}")
             return "Không có câu trả lời do lỗi xử lý"
-        return "\n".join(lst_Answer_Final)
+        return lst_Answer_Final
