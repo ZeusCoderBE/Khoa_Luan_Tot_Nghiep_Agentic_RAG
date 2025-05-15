@@ -2,20 +2,16 @@
 import importlib
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.caches import BaseCache
-from langchain_core.callbacks.base import Callbacks  # hoặc từ đúng path nếu khác
-
-# Monkey‑patch hai type mà Pydantic cần
+from langchain_core.callbacks.base import Callbacks 
 mod = importlib.import_module('langchain_google_genai')
 mod.BaseCache = BaseCache
 mod.Callbacks = Callbacks
-
-# Cuối cùng rebuild class để Pydantic "hiểu" hết annotation
 ChatGoogleGenerativeAI.model_rebuild()
 from langchain_core.output_parsers import StrOutputParser
 from source.model.generate_model import Gemini
-from typing import List, Tuple
-from source.function.utils_shared import load_prompt_from_yaml,clean_generated_queries,load_information_from_json,search_from_json
+from source.function.utils_shared import load_prompt_from_yaml,clean_generated_queries
 from source.core.config import Settings
+from source.tool.google_search import GoogleSearchTool
 class Gemini_Generate():
     def __init__(self,gemini_model:Gemini,settings:Settings):
           self.gemini_model=gemini_model
@@ -38,7 +34,13 @@ class Gemini_Generate():
         queries = [original_query] + generated_queries
 
         return queries    
-    def generate_response(self,query: str, docs: str) -> str:
+    def generate_response(self,query: str, docs) -> str:
+        docs = "\n".join(f"{k}: {v}" for k, v in docs.items())
+        # if check_docs=="no":
+        #     tool=GoogleSearchTool(self.yaml_path)
+        #     resulst_link=tool.search(query)
+        #     links_text = "\n".join(resulst_link)
+        #     return (f"""Xin lỗi bạn. Kiến thức này nằm ngoài phạm vi hiểu biết của tôi. Tuy nhiên tui có tìm hiểu được vài đường link hữu ích. Bạn có thể đọc tham khảo thử \n {links_text}""", 0)
         prompt_template=load_prompt_from_yaml(self.yaml_path,"response")
         response_model = ChatGoogleGenerativeAI(
             google_api_key=self.gemini_model.key_manager.get_next_key(),
@@ -47,11 +49,11 @@ class Gemini_Generate():
             max_tokens=10000,
             top_p=0.6,
         )
+        
         prompt_template=prompt_template.format_messages(original_query=query,context=docs)
         response_chain =response_model | StrOutputParser()
         final_response = response_chain.invoke(prompt_template).strip()
-        
-        return final_response 
+        return final_response
     def classify_query(self, query: str) -> int:
         prompt=load_prompt_from_yaml(self.yaml_path,'classify_query')
         classify_model = ChatGoogleGenerativeAI(
@@ -107,3 +109,4 @@ class Gemini_Generate():
         extract_chain=extract_information_model | StrOutputParser()
         extract_information=extract_chain.invoke(prompt).strip()
         return extract_information
+        

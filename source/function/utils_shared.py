@@ -3,6 +3,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from source.core.config import Settings
 import os
 import json
+import re
 from sentence_transformers import util
 from source.model.embedding_model import Sentences_Transformer_Embedding
 def load_prompt_from_yaml(settings: Settings, section: str) -> ChatPromptTemplate:
@@ -44,3 +45,19 @@ def clean_generated_queries(queries):
                 continue
             cleaned_queries.append(query)
         return cleaned_queries
+def extract_json_dict(text):
+    # Dùng regex để trích nội dung bên trong ```json ... ```
+    match = re.search(r'```json\s*(\{.*?\})\s*```', text, re.DOTALL)
+    if match:
+        json_str = match.group(1)
+        return json.loads(json_str)
+    else:
+        raise ValueError("Không tìm thấy nội dung JSON hợp lệ.")
+def find_references_numbers(text):
+    # Biểu thức chính quy để bắt tất cả các số sau "tài liệu tham khảo"
+    pattern = r"tài liệu tham khảo (\d+)"
+    
+    # Tìm tất cả các số sau "tài liệu tham khảo"
+    matches = re.findall(pattern, text)
+    
+    return matches

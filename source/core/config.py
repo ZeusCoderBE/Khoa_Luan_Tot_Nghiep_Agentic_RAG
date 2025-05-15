@@ -22,4 +22,6 @@ class Settings():
         self.DEVICE={"device": "cpu"}
         self.YAML_PATH=os.getenv("PATH_PROMPT")
         self.PATH_INFOR=os.getenv("PATH_INFOR")
+        self.GOOGLE_SEARCH_API=os.getenv("GOOGLE_SEARCH_API")
+        self.TOOL_SEARCH=os.getenv("TOOL_SEARCH_API")
         
