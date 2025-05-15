@@ -14,15 +14,34 @@ body {
 }
 
 .sidebar {
-    background-color: #F9F9F9; /* Nền trắng cho thanh #171717 */
-    width: 300px; /* Thay đổi kích thước thanh sidebar */
+    background-color: #F9F9F9;
+    width: 300px;
+    min-width: 48px;
     transition: width 0.3s;
     position: relative;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1); /* Thêm bóng đổ cho sidebar */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    z-index: 2;
+    height: 100vh;
+}
+
+.sidebar-collapsed {
+    width: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+    overflow: hidden;
+}
+.sidebar-collapsed .sidebar-content {
+    display: none !important;
+}
+.sidebar-collapsed .sidebar-header {
+    justify-content: center;
 }
 
 .sidebar-content {
-    display: block; /* Đảm bảo sidebar-content luôn hiển thị khi sidebar mở */
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding-bottom: 0;
     padding: 15px; /* Giữ lại padding nếu đã có */
     margin-top: 50px; /* Thêm khoảng cách phía trên để tránh toggle-button */
     color: black;
@@ -142,65 +161,64 @@ body {
 
 .input-area {
     display: flex;
-    padding: 50px 100px; /* Tăng padding để vùng to hơn */
-    background-color: #FFFFFF;
-    border-bottom-left-radius: 10px;
-    border-bottom-right-radius: 10px;
-    margin: 20px; /* Cách lề đều trái phải trên dưới */
+    align-items: center; /* căn giữa theo chiều dọc */
+    background: #f4f4f4;
+    border-radius: 16px;
+    padding: 16px;
+    margin: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    gap: 8px;
 }
 
-/* Phóng to input */
-input[type="text"] {
+#user-query {
     flex: 1;
-    padding: 15px 5px; /* Tăng padding để ô cao hơn */
-    font-size: 15px;     /* Tăng cỡ chữ */
-    height: 45px;        /* Đặt chiều cao cụ thể */
-    border: 1px solid #F4F4F4;
-    border-radius: 40px;
-    margin-right: 10px;
-    background-color: #F4F4F4;
-    color: black;
-}
-
-.chat-messages {
-    flex: 1;
-    padding: 20px;
+    min-height: 40px;
+    max-height: 160px;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 16px;
+    background: #fff;
+    color: #222;
+    resize: none;
     overflow-y: auto;
+    box-shadow: none;
+    outline: none;
+    margin-right: 0;
+    transition: box-shadow 0.2s;
 }
 
-/* Đặt input-area nằm trong chatbox, dính đáy */
-.input-area {
-    display: flex;
-    align-items: center;
-    padding: 20px;
-    background-color: #fff;
-    border-top: 1px solid #ddd;
-}
-
-/* Input và button style như trước */
-input[type="text"] {
-    flex: 1;
-    padding: 15px 20px;
-    font-size: 15px;
-    height: 50px;
-    border: 1px solid #ccc;
-    border-radius: 30px;
-    margin-right: 10px;
-    background-color: #f4f4f4;
-    color: black;
+#user-query:focus {
+    box-shadow: 0 0 0 2px #007bff33;
 }
 
 #send-button {
-    padding: 0 25px;
-    font-size: 16px;
-    background-color: #007BFF;
-    color: white;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #19c37d;
+    color: #fff;
     border: none;
-    border-radius: 30px;
-    height: 50px;
+    font-size: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: background 0.2s, box-shadow 0.2s;
     cursor: pointer;
 }
 
+#send-button:disabled {
+    background: #e5e5e5;
+    color: #aaa;
+    cursor: not-allowed;
+}
+
+#send-button:hover:not(:disabled) {
+    background: #13a06f;
+    box-shadow: 0 4px 16px rgba(25,195,125,0.15);
+}
 
 button {
     padding: 10px 15px;
@@ -324,12 +342,18 @@ button:disabled {
 
 .documents-wrapper {
     display: flex;
-    flex-wrap: wrap; /* Cho phép các thẻ xuống hàng nếu không đủ chỗ */
-    gap: 10px; /* Khoảng cách giữa các thẻ */
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 16px;
+    max-width: 900px;   /* Giới hạn chiều rộng tối đa */
+    margin: 0 auto;     /* Căn giữa wrapper */
+    width: 100%;
 }
 
 .relevant-document {
-    padding: 5px;
+    flex: 1 1 0;
+    min-width: 0;
     background-color: #f9f9f9;
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -339,6 +363,9 @@ button:disabled {
     text-overflow: ellipsis;
     white-space: nowrap;
     transition: transform 0.3s ease;
+    padding: 12px;
+    margin: 0;
+    box-sizing: border-box;
 }
 
 .relevant-document:hover {
@@ -403,6 +430,10 @@ button:disabled {
     margin-bottom: 10px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .chat-session:hover {
@@ -469,4 +500,71 @@ button:disabled {
 .sidebar-content {
     margin-top: 10px;
     padding: 0 10px;
+}
+
+.sidebar-collapsed .chatbot-header-law,
+.sidebar-collapsed #new-chat {
+    display: none !important;
+}
+
+.sidebar-collapsed .toggle-button {
+    margin: 0 auto;
+    display: block;
+    left: 0;
+    right: 0;
+    position: relative;
+    top: 10px;
+}
+
+.session-menu-trigger {
+    display: inline-block;
+    cursor: pointer;
+    padding: 0 8px;
+    font-size: 20px;
+    color: #888;
+    vertical-align: middle;
+    transition: color 0.2s;
+}
+.session-menu-trigger:hover {
+    color: #d00;
+}
+.session-menu {
+    position: absolute;
+    right: 10px;
+    top: 32px;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    z-index: 100;
+    min-width: 80px;
+    display: none;
+}
+.session-menu-item {
+    padding: 8px 16px;
+    cursor: pointer;
+    color: #d00;
+    font-size: 14px;
+}
+.session-menu-item:hover {
+    background: #f5f5f5;
+}
+
+#chat-sessions, .chat-sessions {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    margin-bottom: 0;
+    padding-bottom: 0;
+    min-height: 0;
+}
+
+.delete-icon {
+    vertical-align: middle;
+    margin-right: 8px;
+    margin-bottom: 2px;
+}
+.session-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
