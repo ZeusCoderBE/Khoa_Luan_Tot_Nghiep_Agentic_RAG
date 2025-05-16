@@ -53,11 +53,3 @@ def extract_json_dict(text):
         return json.loads(json_str)
     else:
         raise ValueError("Không tìm thấy nội dung JSON hợp lệ.")
-def find_references_numbers(text):
-    # Biểu thức chính quy để bắt tất cả các số sau "tài liệu tham khảo"
-    pattern = r"tài liệu tham khảo (\d+)"
-    
-    # Tìm tất cả các số sau "tài liệu tham khảo"
-    matches = re.findall(pattern, text)
-    
-    return matches
