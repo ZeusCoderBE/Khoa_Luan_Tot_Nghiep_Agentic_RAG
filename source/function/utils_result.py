@@ -14,14 +14,13 @@ class RAG():
          self.model_embedding=model_embedding
          self.corpus,self.corpus_embedding=load_information_from_json(setting,self.model_embedding)
     def get_Article_Content_Results(self,user_Query):
-        if self.generate.classify_query(user_Query)==0:
-                return self.generate.greeting_query(user_Query),""
-        elif self.generate.classify_query(user_Query)==1:
+        check=self.generate.classify_query(user_Query)
+        if  check==0:
                 context=search_from_json(self.corpus_embedding,self.corpus,user_Query,self.model_embedding)
                 return self.generate.generate_information(user_Query,context),""
-        elif self.generate.classify_query(user_Query)==3:
+        elif check==2:
                 return self.generate.invalid_query(user_Query),""
-        elif self.generate.classify_query(user_Query)==2:
+        elif check==1:
             article_documents = self.qdrant_utils.search_With_Similarity_Queries(user_Query)
             print("Đã thực hiện xong retrival")
             print(f"Số document retrival được {len(article_documents)}")
@@ -37,6 +36,7 @@ class RAG():
                 document_reduce=self.extract_utils.predict(article_Content_Resuls,user_Query)
                 result_gemini=self.generate.generate_response(user_Query,document_reduce)
                 result_gemini=extract_json_dict(result_gemini)
+                print(result_gemini)
                 selected_keys = result_gemini["key"]
                 answer_result = result_gemini['answer']
                 selected_documents = [rerank_article_documents[i] for i in selected_keys]

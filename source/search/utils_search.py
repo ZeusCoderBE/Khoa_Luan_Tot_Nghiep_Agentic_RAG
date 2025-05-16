@@ -19,15 +19,26 @@ class Qdrant_Utils():
             filter=filter
         )
         return search_results
-
     def build_metadata_filter(self, entity_dict: dict) -> Filter:
         conditions = []
         for key, value in entity_dict.items():
             if key == "NgayBanHanhFilter":
-                conditions.append(FieldCondition(key=key, match=MatchAny(any=[value])))
+                conditions.append(
+                    FieldCondition(
+                        key=key,
+                        match=MatchAny(any=[value])
+                    )
+                )
             else:
-                conditions.append(FieldCondition(key=key, match=MatchValue(value=value.lower())))
-        return Filter(should=conditions) if conditions else None
+                conditions.append(
+                    FieldCondition(
+                        key=key,
+                        match=MatchValue(value=value.lower())
+                    )
+                )
+        if not conditions:
+            return None
+        return Filter(should=conditions)
 
 
     def search_With_Similarity_Queries(self, user_query: str):

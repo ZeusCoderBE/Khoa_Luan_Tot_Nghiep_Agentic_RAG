@@ -65,17 +65,6 @@ class Gemini_Generate():
         classify_chain = classify_model | StrOutputParser()
         classification = classify_chain.invoke(prompt).strip()
         return int(classification)
-    def greeting_query(self,query:str)->str:
-        prompt=load_prompt_from_yaml(self.yaml_path,'greeting_query')
-        greeting_model=ChatGoogleGenerativeAI(
-            google_api_key=self.gemini_model.key_manager.get_next_key(),
-            model=self.gemini_model.model_gemini,
-            temperature=0
-        )
-        prompt = prompt.format_messages(query=query)
-        greeting_chain = greeting_model | StrOutputParser()
-        greeting = greeting_chain.invoke(prompt).strip()
-        return greeting
     def invalid_query(self,query:str)->str:
         prompt=load_prompt_from_yaml(self.yaml_path,'invalid_query')
         invalid_model=ChatGoogleGenerativeAI(
