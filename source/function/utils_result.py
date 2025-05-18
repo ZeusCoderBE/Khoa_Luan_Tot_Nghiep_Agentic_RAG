@@ -14,7 +14,6 @@ class RAG():
          self.generate=gemini_utils
          self.model_embedding=model_embedding
          self.corpus,self.corpus_embedding=load_information_from_json(setting,self.model_embedding)
-    
     def get_Article_Content_Results(self,user_Query):
         check=self.generate.classify_query(user_Query)
         if  check==0:

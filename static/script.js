@@ -132,25 +132,12 @@ function sendMessage() {
         data: JSON.stringify({ query: query }),
         success: function(data) {
             setTimeout(() => {
-                clearInterval(updateTimeInterval);
+                clearInterval(updateTimeInterval); // Dừng cập nhật thời gian khi có phản hồi
                 $typingIndicator.remove();
-                processResponse(data);
+                processResponse(data); // Sử dụng processResponse để xử lý phản hồi
 
                 // Lưu tin nhắn của chatbot vào database
                 saveMessage(currentSessionId, 'bot', data.answer);
-
-                // Lưu relevant documents nếu có
-                if (data.lst_Relevant_Documents && data.lst_Relevant_Documents.length > 0) {
-                    // Lấy message_id từ response của saveMessage
-                    $.ajax({
-                        url: 'http://127.0.0.1:8000/api/session/get-last-message-id',
-                        type: 'GET',
-                        data: { session_id: currentSessionId },
-                        success: function(response) {
-                            saveRelevantDocuments(currentSessionId, response.message_id, data.lst_Relevant_Documents);
-                        }
-                    });
-                }
 
                 $chatOutput.scrollTop($chatOutput.prop('scrollHeight'));
                 isLoading = false;
@@ -379,26 +366,6 @@ function saveMessage(sessionId, sender, message) {
     });
 }
 
-// Hàm lưu relevant documents vào database
-function saveRelevantDocuments(sessionId, messageId, documents) {
-    $.ajax({
-        url: 'http://127.0.0.1:8000/api/session/save-relevant-documents',
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({
-            session_id: sessionId,
-            message_id: messageId,
-            documents: documents
-        }),
-        success: function(response) {
-            console.log("Relevant documents saved:", response);
-        },
-        error: function() {
-            console.error("Error saving relevant documents.");
-        }
-    });
-}
-
 // Hàm load danh sách các phiên chat cũ
 function loadChatSessions() {
     $.ajax({
@@ -506,6 +473,7 @@ $('.chat-session').on('click', function() {
 function loadChatHistory(sessionId) {
     console.log("Loading chat history for session ID:", sessionId);
 
+<<<<<<< HEAD
     // Xóa phần trích dẫn tham khảo khi load lịch sử chat
     $('#relevant-documents-container').empty();
 
@@ -514,6 +482,8 @@ function loadChatHistory(sessionId) {
     // Thêm class selected cho phiên chat được chọn
     $(`.chat-session[data-session-id="${sessionId}"]`).addClass('selected');
 
+=======
+>>>>>>> parent of 288ea92 (feat: lưu trích dẫn tham khảo vào database)
     // Gọi API để lấy lịch sử chat
     $.ajax({
         url: `http://127.0.0.1:8000/api/session/get-chat-history/${sessionId}`,
@@ -545,16 +515,17 @@ function loadChatHistory(sessionId) {
                 $chatOutput.append(messageHtml);
             });
 
-            const $inputArea = $('#user-query');
-            $inputArea.prop('disabled', false);
-            $inputArea.attr('placeholder', 'Nhập tin nhắn ...');
+            const $inputArea = $('#user-query');  // Sử dụng id 'user-query' thay vì class 'input-area'
+            // Vô hiệu hóa input và thay đổi placeholder
+            $inputArea.prop('disabled', false);  // Mở input
+            $inputArea.attr('placeholder', 'Nhập tin nhắn ...');  // Thay đổi placeholder
 
             // Sau khi tải xong lịch sử chat, cập nhật trạng thái nút Clear Chat
             updateClearChatButtonState();
 
             // Cập nhật session ID hiện tại
             currentSessionId = sessionId;
-            localStorage.setItem('session_id', sessionId);
+            localStorage.setItem('session_id', sessionId); // Lưu lại session ID
         },
         error: function () {
             console.error("Error loading chat history.");

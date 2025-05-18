@@ -3,19 +3,12 @@ from source.schema.message_input import MessageInput
 from source.data.db.utils_db import DB_Utils
 from source.data.db.db_connection import DBConnection
 from source.core.config import Settings
-from typing import List
-from pydantic import BaseModel
 
 # Khởi tạo các đối tượng
 router = APIRouter()
 setting = Settings()
 db = DBConnection(setting)
 db_utils = DB_Utils(db)
-
-class RelevantDocumentsInput(BaseModel):
-    session_id: int
-    message_id: int
-    documents: List[str]
 
 @router.post("/start-session")
 def start_session():
@@ -68,20 +61,3 @@ def delete_session(session_id: int):
         return {"status": "success", "message": "Session deleted successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error deleting session: {str(e)}")
-
-@router.post("/save-relevant-documents")
-def save_relevant_documents(data: RelevantDocumentsInput):
-    try:
-        for doc in data.documents:
-            db_utils.Insert_Reference(data.session_id, data.message_id, doc)
-        return {"status": "success", "message": "Relevant documents saved successfully"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error saving relevant documents: {str(e)}")
-
-@router.get("/get-last-message-id")
-def get_last_message_id(session_id: int):
-    try:
-        message_id = db_utils.Get_Last_Message_ID(session_id)
-        return {"message_id": message_id}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error getting last message ID: {str(e)}")
