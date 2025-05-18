@@ -71,38 +71,39 @@ prompts:
 
          ### REFERENCE CONTENT:
           '{context}'
+        
+         ### INSTRUCTIONS
+         Please carefully follow the instructions below when answering the query:
 
-         ## GUIDELINES:
-         ### 1. Understanding the Question:
-         - Interpret the query carefully, including semantic variations, synonyms, or implicit meanings.
-         - Identify the core legal issues that require analysis.
+         #### 1. Understand the Question  
+         - Carefully interpret the user query, including synonyms and implicit meanings.  
+         - Identify the core legal issue(s) that require analysis.
 
-         ### 2. Select and Prioritize Relevant Legal Documents:
-         - **Before writing**, select a list of relevant legal sources from the REFERENCE CONTENT.
-         - This list is referred to as the **key list**, and it must be sorted in descending order of relevance.
-         - Your answer must be based **entirely and exclusively** on the selected key list.
-         - **You are not allowed** to use, reference, or infer from any document that is **not included in the key list**.
 
-         ### 3. If Context Is Insufficient:
-         - If the context does not provide enough information to answer, respond with the following in Vietnamese:
+         #### 2. If the Context Is Insufficient  
+         Respond in Vietnamese exactly as follows:  
          > "Xin lỗi bạn. Kiến thức này nằm ngoài phạm vi hiểu biết của tôi. Bạn có thể hỏi tôi một câu hỏi khác không? Tôi sẽ cố gắng giải đáp câu hỏi của bạn!"
 
-         #### 4. Answer Structure:
-          - Begin with a brief summary of the legal issue raised in the query.
-          - Explain your reasoning in clear, structured paragraphs. Each point must be directly supported by one or more sources from the key list.
-          - Use bullet points or numbered lists where appropriate for readability.
-          - Do **not fabricate** any information or legal interpretations.
-          - You may only infer conclusions that are **clearly and logically implied** by the content of the selected key list.
-          - **Do not include article numbers or legal document names in the response.** The content must be written in natural Vietnamese without explicit citations.
-          - Conclude with a clear, direct statement that answers the legal question
+         #### 3. Write the Answer (In Vietnamese)  
+         - Begin with a brief summary of the legal issue.  
+         - Provide a clear, structured argument using bullet points or numbered lists. Each point must be supported by one or more documents from the key list.  
+         - Avoid direct citations of articles, clauses, or document names in the *answer*.  
+         - **Do not** fabricate any information or legal interpretations.  
+         - Draw only conclusions that are clearly and logically implied by the key list.  
+         - End with a clear and direct statement that answers the question.
 
-          ### 5. Answer Format:
-          ```json
+         #### 4. Build a **Key List** of Relevant Sources *Before Writing*  
+         1. Select all legal documents relevant to the question from the **REFERENCE CONTENT**.  
+         2. Sort them in **descending order of relevance** to create the **key list**.  
+         3. You must base your answer **entirely and exclusively** on this key list.  
+         4. Do **not** reference, use, or infer from any document outside the key list.
+
+         #### 5. Answer Format:
+          - key: a list of integers 
           {{
-            "answer": "Your detailed legal answer in Vietnamese ...).",
-            "key": [list of selected document numbers in descending order of relevance]
+            "answer": 'Your detailed legal answer in Vietnamese ...).',
+            "key": [list of selected document numbers]
           }}
-          ```
   classify_query:
     messages:
       - role: system
@@ -177,7 +178,7 @@ prompts:
           Then return **2**
 
           ### Guidelines:
-          - You must return a single integer: `0`, `1`, `2`, or `3`.
+          - You must return a single integer: `0`, `1`, `2`
           - Do not generate any additional content or explanations.
   invalid_query:
     messages:

@@ -18,6 +18,8 @@ class Qdrant_Utils():
             timeout=300,
             filter=filter
         )
+        if search_results:
+            print("Tìm được")
         return search_results
     def build_metadata_filter(self, entity_dict: dict) -> Filter:
         conditions = []
@@ -25,14 +27,14 @@ class Qdrant_Utils():
             if key == "NgayBanHanhFilter":
                 conditions.append(
                     FieldCondition(
-                        key=key,
+                        key='metadata.'+key,
                         match=MatchAny(any=[value])
                     )
                 )
             else:
                 conditions.append(
                     FieldCondition(
-                        key=key,
+                        key='metadata.'+key,
                         match=MatchValue(value=value.lower())
                     )
                 )

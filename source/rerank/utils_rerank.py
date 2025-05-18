@@ -33,7 +33,7 @@ class Rerank_Utils():
                     model=self.model_rerank.model_cohere,
                     query=query,
                     documents=doc_contents,
-                    top_n=10,
+                    top_n=5,
                 )
                 reranked_results = response.results
                 print(reranked_results)
