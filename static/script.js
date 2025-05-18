@@ -470,6 +470,31 @@ $('.chat-session').on('click', function() {
     updateClearChatButtonState();
 });
 
+// Hàm load tài liệu tham khảo cho một tin nhắn
+function loadMessageReferences(messageId) {
+    // Xóa class selected từ tất cả tin nhắn bot
+    $('.chat-message.bot').removeClass('selected');
+    
+    // Thêm class selected cho tin nhắn được click
+    $(`.chat-message.bot[data-message-id="${messageId}"]`).addClass('selected');
+
+    $.ajax({
+        url: `http://127.0.0.1:8000/api/session/get-message-references/${messageId}`,
+        type: 'GET',
+        contentType: 'application/json',
+        success: function(response) {
+            if (response.references && response.references.length > 0) {
+                displayRelevantDocuments(response.references);
+            } else {
+                $('#relevant-documents-container').empty();
+            }
+        },
+        error: function() {
+            console.error("Error loading message references.");
+        }
+    });
+}
+
 // Hàm load lại lịch sử chat của một phiên
 function loadChatHistory(sessionId) {
     console.log("Loading chat history for session ID:", sessionId);
@@ -477,8 +502,10 @@ function loadChatHistory(sessionId) {
     // Xóa phần trích dẫn tham khảo khi load lịch sử chat
     $('#relevant-documents-container').empty();
 
-    // Xóa class selected từ tất cả các phiên chat
+    // Xóa class selected từ tất cả các phiên chat và tin nhắn bot
     $('.chat-session').removeClass('selected');
+    $('.chat-message.bot').removeClass('selected');
+    
     // Thêm class selected cho phiên chat được chọn
     $(`.chat-session[data-session-id="${sessionId}"]`).addClass('selected');
 
@@ -527,25 +554,6 @@ function loadChatHistory(sessionId) {
         },
         error: function () {
             console.error("Error loading chat history.");
-        }
-    });
-}
-
-// Hàm load tài liệu tham khảo cho một tin nhắn
-function loadMessageReferences(messageId) {
-    $.ajax({
-        url: `http://127.0.0.1:8000/api/session/get-message-references/${messageId}`,
-        type: 'GET',
-        contentType: 'application/json',
-        success: function(response) {
-            if (response.references && response.references.length > 0) {
-                displayRelevantDocuments(response.references);
-            } else {
-                $('#relevant-documents-container').empty();
-            }
-        },
-        error: function() {
-            console.error("Error loading message references.");
         }
     });
 }

@@ -579,3 +579,45 @@ button:disabled {
     align-items: center;
     gap: 6px;
 }
+
+.chat-message.bot {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.chat-message.bot:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+    transform: translateX(5px);
+}
+
+.chat-message.bot:hover::after {
+    content: "Click để xem tài liệu tham khảo";
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    opacity: 0;
+    animation: fadeIn 0.3s ease forwards;
+}
+
+.chat-message.bot.selected {
+    background-color: rgba(25, 195, 125, 0.1);
+    border-left: 3px solid #19c37d;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50%) translateX(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+    }
+}
