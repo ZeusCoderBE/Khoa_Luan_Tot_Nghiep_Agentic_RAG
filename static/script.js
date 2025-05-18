@@ -343,6 +343,11 @@ $('#new-chat').on('click', function (event) {
 
 // Hàm lưu tin nhắn vào database
 function saveMessage(sessionId, sender, message, references = null) {
+    // Xử lý trường hợp references là chuỗi rỗng
+    if (references === "") {
+        references = [];
+    }
+    
     $.ajax({
         url: 'http://127.0.0.1:8000/api/session/save-message',
         type: 'POST',
@@ -356,8 +361,8 @@ function saveMessage(sessionId, sender, message, references = null) {
         success: function(response) {
             console.log("Message saved:", response);
         },
-        error: function() {
-            console.error("Error saving message.");
+        error: function(xhr) {
+            console.error("Error saving message:", xhr.responseText);
         }
     });
 }
