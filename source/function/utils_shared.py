@@ -53,3 +53,28 @@ def extract_json_dict(text):
         return json.loads(json_str)
     else:
         raise ValueError("Không tìm thấy nội dung JSON hợp lệ.")
+    
+def clean_code_fence_safe(text: str) -> str:
+    lines = text.strip().splitlines()
+    if lines and lines[0].strip().startswith("```"):
+        # Nếu dòng đầu chỉ chứa dấu ``` hoặc ```json
+        if lines[0].strip() == "```" or lines[0].strip().startswith("```"):
+            lines = lines[1:]
+    if lines and lines[-1].strip() == "```":
+        lines = lines[:-1]
+    return "\n".join(lines).strip()
+
+def fix_json_string(s):
+    # Bước 1: Thay xuống dòng thật trong chuỗi thành \n chỉ trong giá trị của key "answer"
+    # Dùng regex để lấy phần trong dấu ""
+    match = re.search(r'"answer"\s*:\s*"(.+?)"\s*,', s, flags=re.DOTALL)
+    if not match:
+        return s  # Không tìm thấy "answer", trả về nguyên bản
+
+    answer_str = match.group(1)
+    # Thay xuống dòng thật thành \n
+    answer_fixed = answer_str.replace('\n', '\\n')
+
+    # Thay lại trong chuỗi gốc
+    s_fixed = s.replace(answer_str, answer_fixed)
+    return s_fixed

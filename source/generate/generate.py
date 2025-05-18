@@ -36,11 +36,6 @@ class Gemini_Generate():
         return queries    
     def generate_response(self,query: str, docs) -> str:
         docs = "\n".join(f"{k}: {v}" for k, v in docs.items())
-        # if check_docs=="no":
-        #     tool=GoogleSearchTool(self.yaml_path)
-        #     resulst_link=tool.search(query)
-        #     links_text = "\n".join(resulst_link)
-        #     return (f"""Xin lỗi bạn. Kiến thức này nằm ngoài phạm vi hiểu biết của tôi. Tuy nhiên tui có tìm hiểu được vài đường link hữu ích. Bạn có thể đọc tham khảo thử \n {links_text}""", 0)
         prompt_template=load_prompt_from_yaml(self.yaml_path,"response")
         response_model = ChatGoogleGenerativeAI(
             google_api_key=self.gemini_model.key_manager.get_next_key(),
