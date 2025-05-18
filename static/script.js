@@ -473,7 +473,6 @@ $('.chat-session').on('click', function() {
 function loadChatHistory(sessionId) {
     console.log("Loading chat history for session ID:", sessionId);
 
-<<<<<<< HEAD
     // Xóa phần trích dẫn tham khảo khi load lịch sử chat
     $('#relevant-documents-container').empty();
 
@@ -482,8 +481,6 @@ function loadChatHistory(sessionId) {
     // Thêm class selected cho phiên chat được chọn
     $(`.chat-session[data-session-id="${sessionId}"]`).addClass('selected');
 
-=======
->>>>>>> parent of 288ea92 (feat: lưu trích dẫn tham khảo vào database)
     // Gọi API để lấy lịch sử chat
     $.ajax({
         url: `http://127.0.0.1:8000/api/session/get-chat-history/${sessionId}`,
