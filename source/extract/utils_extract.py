@@ -49,7 +49,7 @@ class Extract_Information():
                 if answers:
                     answers.sort(key=lambda x: x["score"], reverse=True)
                     best_answer = answers[0]['text']
-                    lst_Answer_Final[idx] = best_answer.replace("_", " ")
+                    lst_Answer_Final[idx] = best_answer.replace("_", " ").replace(' .', '.').replace(' ,', ',').replace(' !', '!').replace(' ?', '?').replace(' :', ':').replace(' ;', ';')
                 else:
                     lst_Answer_Final[idx] = "Không có câu trả lời"
         except Exception as e:
