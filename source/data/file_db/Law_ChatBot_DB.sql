@@ -24,11 +24,24 @@ CREATE TABLE Chat_Messages (
 );
 GO
 
+-- Tạo bảng Chat_References để lưu trích dẫn tham khảo
+CREATE TABLE Chat_References (
+    id INT PRIMARY KEY IDENTITY(1,1),  -- ID tự tăng
+    session_id INT,  -- Liên kết đến Chat_Sessions
+    message_id INT,  -- Liên kết đến Chat_Messages
+    reference_content NVARCHAR(MAX),  -- Nội dung trích dẫn (có thể NULL)
+    CONSTRAINT FK_ReferenceSession FOREIGN KEY (session_id) REFERENCES Chat_Sessions(id) ON DELETE CASCADE,
+    CONSTRAINT FK_ReferenceMessage FOREIGN KEY (message_id) REFERENCES Chat_Messages(id) ON DELETE CASCADE
+);
+GO
+
 --select *from chat_sessions
 --select *from Chat_Messages
+--select *from Chat_References
 
 --delete from Chat_Sessions
 --delete from Chat_Messages
+--delete from Chat_References
 
 --DELETE FROM Chat_Sessions WHERE NOT EXISTS (
 --    SELECT 1

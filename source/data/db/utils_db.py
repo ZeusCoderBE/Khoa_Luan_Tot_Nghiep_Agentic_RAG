@@ -81,3 +81,37 @@ class DB_Utils():
         
         conn.commit()  
         conn.close()  
+
+    def Insert_Reference(self, session_id, message_id, reference_content):
+        conn = self.db.Get_DB_Connection()
+        cursor = conn.cursor()
+        
+        cursor.execute(
+            """
+            INSERT INTO Chat_References (session_id, message_id, reference_content)
+            VALUES (?, ?, ?)
+            """,
+            (session_id, message_id, reference_content)
+        )
+
+        conn.commit()  
+        conn.close()  
+
+    def Get_Last_Message_ID(self, session_id):
+        conn = self.db.Get_DB_Connection()
+        cursor = conn.cursor()
+        
+        cursor.execute(
+            """
+            SELECT TOP 1 id 
+            FROM Chat_Messages 
+            WHERE session_id = ? 
+            ORDER BY send_at DESC
+            """,
+            (session_id,)
+        )
+        
+        message_id = cursor.fetchone()[0]
+        conn.close()
+        
+        return message_id
