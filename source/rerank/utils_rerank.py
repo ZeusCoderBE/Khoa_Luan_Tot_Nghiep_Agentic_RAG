@@ -36,7 +36,7 @@ class Rerank_Utils():
             print(f"Lỗi khi tính RRF: {e}")
             return []
     def rerank_documents(self,query,documents) -> List[Tuple[str, float]]:
-            doc_contents = [(doc).replace("_"," ") for doc,_ in documents]
+            doc_contents = [(doc).replace("_"," ").replace(' .', '.').replace(' ,', ',').replace(' !', '!').replace(' ?', '?').replace(' :', ':').replace(' ;', ';') for doc,_ in documents]
             try:
                 co = ClientV2(self.model_rerank.key_manager.get_next_key())
                 response = co.rerank(

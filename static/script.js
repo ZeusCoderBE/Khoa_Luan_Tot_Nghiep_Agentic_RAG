@@ -276,8 +276,18 @@ function displayRelevantDocuments(documents) {
 
 // Hàm mở nội dung đầy đủ khi click vào Trích dẫn
 function openFullscreenDocument(content) {
-    // Thay thế ký tự xuống dòng bằng thẻ <br> để hiển thị cách dòng đúng
-    const formattedContent = content.replace(/\n/g, "<br>");
+    // Thay thế \n thành <br>
+    let formattedContent = content.replace(/\n/g, "<br>");
+    // Thêm <br> trước các số thứ tự đầu dòng (1., 2., 3., ...), nếu phía trước không phải là <br> hoặc đầu dòng
+    formattedContent = formattedContent.replace(/(?:<br>|^)(\d+\.\s)/g, function(match, p1, offset, string) {
+        // Nếu đã có <br> phía trước thì giữ nguyên, nếu là đầu dòng thì giữ nguyên
+        return match;
+    });
+    // Nếu chưa có <br> phía trước số thứ tự (ví dụ: bị dính liền), thì thêm vào
+    formattedContent = formattedContent.replace(/([^<br>])((\d+\.\s))/g, '$1<br>$2');
+
+    // Loại bỏ <br> dư ở đầu nếu có
+    formattedContent = formattedContent.replace(/^<br>/, "");
 
     // Tạo overlay để hiển thị nội dung phóng to
     const overlay = $(`

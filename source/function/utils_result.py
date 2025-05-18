@@ -58,7 +58,7 @@ class RAG():
                         Tiểu mục: {infor['doc_metadata'].get("MiniSection", "")}
                         Điều: {infor['doc_metadata'].get("Article", "")}
                         <=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=>
-                        {doc.replace("_", " ")}
+                        {doc.replace("_", " ").replace(' .', '.').replace(' ,', ',').replace(' !', '!').replace(' ?', '?').replace(' :', ':').replace(' ;', ';')}
                         """ 
                             for i, ((doc, infor), key) in enumerate(zip(selected_documents,selected_keys))
                         ]
