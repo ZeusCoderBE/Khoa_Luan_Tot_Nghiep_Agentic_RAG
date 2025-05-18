@@ -113,17 +113,12 @@ function sendMessage() {
 
     // Cập nhật số phút và giây trong "Đang suy nghĩ câu trả lời"
     const updateTimeInterval = setInterval(() => {
-        const elapsedTime = Math.floor((Date.now() - startTime) / 1000); // Tính số giây đã trôi qua
-        const minutes = Math.floor(elapsedTime / 60); // Tính phút
-        const seconds = elapsedTime % 60; // Tính giây còn lại
-
-        // Đảm bảo rằng phút và giây đều có 2 chữ số
+        const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+        const minutes = Math.floor(elapsedTime / 60);
+        const seconds = elapsedTime % 60;
         const formattedTime = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-
-        // Cập nhật hiển thị thời gian
         $typingIndicator.find('.time-count').text(formattedTime);
-    }, 1000); // Cập nhật mỗi giây
-
+    }, 1000);
 
     $.ajax({
         url: 'http://127.0.0.1:8000/api/chat/chatbot-with-gemini',
@@ -132,12 +127,12 @@ function sendMessage() {
         data: JSON.stringify({ query: query }),
         success: function(data) {
             setTimeout(() => {
-                clearInterval(updateTimeInterval); // Dừng cập nhật thời gian khi có phản hồi
+                clearInterval(updateTimeInterval);
                 $typingIndicator.remove();
-                processResponse(data); // Sử dụng processResponse để xử lý phản hồi
+                processResponse(data);
 
-                // Lưu tin nhắn của chatbot vào database
-                saveMessage(currentSessionId, 'bot', data.answer);
+                // Lưu tin nhắn của chatbot và tài liệu tham khảo vào database
+                saveMessage(currentSessionId, 'bot', data.answer, data.lst_Relevant_Documents);
 
                 $chatOutput.scrollTop($chatOutput.prop('scrollHeight'));
                 isLoading = false;
@@ -347,7 +342,7 @@ $('#new-chat').on('click', function (event) {
 });
 
 // Hàm lưu tin nhắn vào database
-function saveMessage(sessionId, sender, message) {
+function saveMessage(sessionId, sender, message, references = null) {
     $.ajax({
         url: 'http://127.0.0.1:8000/api/session/save-message',
         type: 'POST',
@@ -355,7 +350,8 @@ function saveMessage(sessionId, sender, message) {
         data: JSON.stringify({
             session_id: sessionId,
             sender: sender,
-            message: message
+            message: message,
+            references: references
         }),
         success: function(response) {
             console.log("Message saved:", response);
@@ -489,20 +485,17 @@ function loadChatHistory(sessionId) {
         success: function (response) {
             const chatHistory = response.chat_history;
             const $chatOutput = $('#chat-output');
-            $chatOutput.empty(); // Xóa khung chat hiện tại
+            $chatOutput.empty();
 
             // Duyệt qua lịch sử chat và hiển thị từng tin nhắn
             chatHistory.forEach(chat => {
                 const isBot = chat.sender === 'bot';
                 
-                // Chuyển các đoạn có dấu ** thành thẻ <strong> để in đậm
                 let formattedMessage = chat.message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-                // Thay thế \n bằng <br> để hiển thị xuống dòng
                 formattedMessage = formattedMessage.replace(/\n/g, "<br>");
 
                 const messageHtml = `
-                    <div class="chat-message ${isBot ? 'bot' : 'user'}">
+                    <div class="chat-message ${isBot ? 'bot' : 'user'}" data-message-id="${chat.id}">
                         <div class="avatar ${isBot ? 'bot-avatar' : 'user-avatar'}" 
                              style="background-image: url('${isBot ? 'https://png.pngtree.com/png-vector/20230225/ourmid/pngtree-smart-chatbot-cartoon-clipart-png-image_6620453.png' : 'https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o='}');">
                         </div>
@@ -512,20 +505,42 @@ function loadChatHistory(sessionId) {
                 $chatOutput.append(messageHtml);
             });
 
-            const $inputArea = $('#user-query');  // Sử dụng id 'user-query' thay vì class 'input-area'
-            // Vô hiệu hóa input và thay đổi placeholder
-            $inputArea.prop('disabled', false);  // Mở input
-            $inputArea.attr('placeholder', 'Nhập tin nhắn ...');  // Thay đổi placeholder
+            // Thêm sự kiện click cho tin nhắn của bot
+            $('.chat-message.bot').on('click', function() {
+                const messageId = $(this).data('message-id');
+                loadMessageReferences(messageId);
+            });
 
-            // Sau khi tải xong lịch sử chat, cập nhật trạng thái nút Clear Chat
+            const $inputArea = $('#user-query');
+            $inputArea.prop('disabled', false);
+            $inputArea.attr('placeholder', 'Nhập tin nhắn ...');
+
             updateClearChatButtonState();
 
-            // Cập nhật session ID hiện tại
             currentSessionId = sessionId;
-            localStorage.setItem('session_id', sessionId); // Lưu lại session ID
+            localStorage.setItem('session_id', sessionId);
         },
         error: function () {
             console.error("Error loading chat history.");
+        }
+    });
+}
+
+// Hàm load tài liệu tham khảo cho một tin nhắn
+function loadMessageReferences(messageId) {
+    $.ajax({
+        url: `http://127.0.0.1:8000/api/session/get-message-references/${messageId}`,
+        type: 'GET',
+        contentType: 'application/json',
+        success: function(response) {
+            if (response.references && response.references.length > 0) {
+                displayRelevantDocuments(response.references);
+            } else {
+                $('#relevant-documents-container').empty();
+            }
+        },
+        error: function() {
+            console.error("Error loading message references.");
         }
     });
 }

@@ -21,7 +21,9 @@ def start_session():
 @router.post("/save-message")
 def save_message(data: MessageInput):
     try:
-        db_utils.Insert_Message(data.session_id, data.sender, data.message)
+        message_id = db_utils.Insert_Message(data.session_id, data.sender, data.message)
+        if data.sender == 'bot' and hasattr(data, 'references'):
+            db_utils.Insert_References(message_id, data.references)
         return {"status": "success", "message": "Message saved successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error saving message: {str(e)}")
@@ -45,14 +47,23 @@ def get_chat_history(session_id: int):
         return {
             "chat_history": [
                 {
-                    "sender": m[0],
-                    "message": m[1],
-                    "send_at": m[2].strftime('%Y-%m-%d %H:%M:%S')
+                    "id": m[0],
+                    "sender": m[1],
+                    "message": m[2],
+                    "send_at": m[3].strftime('%Y-%m-%d %H:%M:%S')
                 } for m in messages
             ]
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error fetching chat history: {str(e)}")
+
+@router.get("/get-message-references/{message_id}")
+def get_message_references(message_id: int):
+    try:
+        references = db_utils.Get_References(message_id)
+        return {"references": references}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching message references: {str(e)}")
 
 @router.delete("/delete-session/{session_id}")
 def delete_session(session_id: int):
