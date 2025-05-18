@@ -21,6 +21,16 @@ class Rerank_Utils():
                     document_scores[doc_key]["score"] += rrf_score
                     document_scores[doc_key]["count"] += 1
             reranked_docs = sorted(document_scores.items(), key=lambda x: x[1]["score"], reverse=True)
+            
+            # # In thông tin chi tiết về kết quả đã xếp hạng
+            # print("\n=== Kết quả đã xếp hạng lại ===")
+            # print(f"Tổng số kết quả: {len(reranked_docs)}")
+            # for idx, (content, info) in enumerate(reranked_docs[:50], 1):
+            #     print(f"\n--- Kết quả #{idx} ---")
+            #     print(f"Điểm số: {info['score']:.4f}")
+            #     print(f"Số lần xuất hiện: {info['count']}")
+            #     print(f"Nội dung: {content[:200]}...")  # In 200 ký tự đầu tiên
+                
             return reranked_docs[:50]  
         except Exception as e:
             print(f"Lỗi khi tính RRF: {e}")
@@ -36,8 +46,21 @@ class Rerank_Utils():
                     top_n=5,
                 )
                 reranked_results = response.results
-                print(reranked_results)
+                # print("\n=== Kết quả từ Cohere Rerank ===")
+                # for idx, result in enumerate(reranked_results, 1):
+                #     print(f"\n--- Kết quả #{idx} ---")
+                #     print(f"Điểm số: {result.relevance_score:.4f}")
+                #     print(f"Index: {result.index}")
+                #     print(f"Nội dung: {doc_contents[result.index][:200]}...")
+                
                 ranked_documents = [documents[res.index] for res in reranked_results]
+                
+                # print("\n=== Kết quả cuối cùng sau khi xếp hạng ===")
+                # for idx, (doc, score) in enumerate(ranked_documents, 1):
+                #     print(f"\n--- Kết quả #{idx} ---")
+                #     print(f"Điểm số: {score}")
+                #     print(f"Nội dung: {doc[:200]}...")
+                
             except Exception as e:
                 print(f"An error occurred: {e}")
             return ranked_documents  
