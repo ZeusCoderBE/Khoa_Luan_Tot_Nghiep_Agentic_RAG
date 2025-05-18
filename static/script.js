@@ -509,6 +509,11 @@ function loadChatHistory(sessionId) {
     // Xóa phần trích dẫn tham khảo khi load lịch sử chat
     $('#relevant-documents-container').empty();
 
+    // Xóa class selected từ tất cả các phiên chat
+    $('.chat-session').removeClass('selected');
+    // Thêm class selected cho phiên chat được chọn
+    $(`.chat-session[data-session-id="${sessionId}"]`).addClass('selected');
+
     // Gọi API để lấy lịch sử chat
     $.ajax({
         url: `http://127.0.0.1:8000/api/session/get-chat-history/${sessionId}`,

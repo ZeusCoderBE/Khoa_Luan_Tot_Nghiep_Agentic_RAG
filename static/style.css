@@ -440,6 +440,17 @@ button:disabled {
     background-color: #ECECEC;
 }
 
+/* Thêm style cho phiên chat được chọn */
+.chat-session.selected {
+    background-color: #e3f2fd;
+    border-color: #2196f3;
+    box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1);
+}
+
+.chat-session.selected:hover {
+    background-color: #e3f2fd;
+}
+
 .chat-session-content {
     font-size: 14px;
     color: #333;

@@ -76,7 +76,7 @@ class DB_Utils():
         conn = self.db.Get_DB_Connection()
         cursor = conn.cursor()
 
-        cursor.execute("DELETE FROM Chat_Messages WHERE session_id = ?", (session_id,))
+        # cursor.execute("DELETE FROM Chat_Messages WHERE session_id = ?", (session_id,))
         cursor.execute("DELETE FROM Chat_Sessions WHERE id = ?", (session_id,))
         
         conn.commit()  
