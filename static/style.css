@@ -312,7 +312,7 @@ button:disabled {
 }
 
 .chatbot-image-law {
-    width: 30px;
+    width: 10px;
     height: 30px;
     object-fit: cover;
     border-radius: 50%;         /* Cho hình tròn nếu cần */
@@ -490,7 +490,7 @@ button:disabled {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-left: 60px; /* Di chuyển icon ChatLaw sang phải thêm */
+    margin-left: 53px; /* Di chuyển icon ChatLaw sang phải thêm */
     margin-top: 10px;
 }
 .chatbot-header-law h3 {

@@ -24,4 +24,7 @@ class Settings():
         self.PATH_INFOR=os.getenv("PATH_INFOR")
         self.GOOGLE_SEARCH_API=os.getenv("GOOGLE_SEARCH_API")
         self.TOOL_SEARCH=os.getenv("TOOL_SEARCH_API")
-        
+        # Thêm các biến kết nối DB
+        self.DB_HOST = os.getenv("DB_HOST")
+        self.DB_NAME = os.getenv("DB_NAME")
+        self.DRIVER=os.getenv("DRIVER")
