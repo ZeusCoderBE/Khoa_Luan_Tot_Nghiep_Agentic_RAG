@@ -27,7 +27,7 @@ class RAG():
             print(f"Số document retrival được {len(article_documents)}")
             rrf_result_docs=self.rerank_utils.reciprocal_rank_fusion(article_documents)
             print(f"Số document khi xoá trùng {len(rrf_result_docs)}")
-            rerank_article_documents = self.rerank_utils.rerank_documents(user_Query,rrf_result_docs)
+            rerank_article_documents = self.rerank_utils.rerank_documents_finetune(user_Query,rrf_result_docs)
             print(f"Số document qua rerank {len(rerank_article_documents)}")
             lst_Article_Quote = []
             article_Content_Resuls=[]

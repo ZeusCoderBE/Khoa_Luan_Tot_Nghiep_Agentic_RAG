@@ -1,9 +1,14 @@
 from typing import List,Tuple
 from source.model.rerank_model import Cohere
 from cohere import ClientV2
+from sentence_transformers import CrossEncoder
+
 class Rerank_Utils():
     def __init__(self,model_rerank:Cohere):
          self.model_rerank=model_rerank
+         self.model_repo = "hghaan/rerank_model"
+         self.finetune_model = CrossEncoder(self.model_repo, trust_remote_code=True, device="cuda")
+    
     def reciprocal_rank_fusion(self,documents_nested, k=60):
         document_scores = {}  
         try:
@@ -35,6 +40,7 @@ class Rerank_Utils():
         except Exception as e:
             print(f"Lỗi khi tính RRF: {e}")
             return []
+    
     def rerank_documents(self,query,documents) -> List[Tuple[str, float]]:
             doc_contents = [(doc).replace("_"," ").replace(' .', '.').replace(' ,', ',').replace(' !', '!').replace(' ?', '?').replace(' :', ':').replace(' ;', ';') for doc,_ in documents]
             try:
@@ -64,3 +70,27 @@ class Rerank_Utils():
             except Exception as e:
                 print(f"An error occurred: {e}")
             return ranked_documents  
+    
+    def rerank_documents_finetune(self,query,documents) -> List[Tuple[str, float]]:
+        if len(documents) > 50:
+            raise ValueError("Số lượng documents không được vượt quá 50.")
+            
+        # Lấy nội dung và metadata từ kết quả của reciprocal_rank_fusion
+        doc_contents = [doc for doc, _ in documents]
+        doc_metadata = [info['doc_metadata'] for _, info in documents]
+        
+        # Xử lý format của documents
+        doc_contents = [(doc).replace("_"," ").replace(' .', '.').replace(' ,', ',').replace(' !', '!').replace(' ?', '?').replace(' :', ':').replace(' ;', ';') for doc in doc_contents]
+        
+        try:
+            pairs = [(query, doc) for doc in doc_contents]
+            scores = self.finetune_model.predict(pairs)
+            # Chuyển đổi scores từ numpy.float32 sang float
+            scores = [float(score) for score in scores]
+            # Sắp xếp documents theo score
+            ranked = sorted(zip(scores, range(len(doc_contents))), key=lambda x: x[0], reverse=True)
+            # Trả về top 5 documents với cấu trúc giống rerank_documents nhưng giữ metadata
+            return [(doc_contents[idx], {'score': score, 'doc_metadata': doc_metadata[idx]}) for score, idx in ranked[:5]]
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return []  
