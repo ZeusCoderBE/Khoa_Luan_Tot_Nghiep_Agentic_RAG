@@ -258,20 +258,14 @@ function displayRelevantDocuments(documents) {
 
 // Hàm mở nội dung đầy đủ khi click vào Trích dẫn
 function openFullscreenDocument(content) {
-    // Thay thế \n thành <br>
     let formattedContent = content.replace(/\n/g, "<br>");
-    // Thêm <br> trước các số thứ tự đầu dòng (1., 2., 3., ...), nếu phía trước không phải là <br> hoặc đầu dòng
-    formattedContent = formattedContent.replace(/(?:<br>|^)(\d+\.\s)/g, function(match, p1, offset, string) {
-        // Nếu đã có <br> phía trước thì giữ nguyên, nếu là đầu dòng thì giữ nguyên
-        return match;
+    // Thêm <br> trước số thứ tự, nhưng không thêm nếu trước đó là 'Điều: Điều' (có thể có khoảng trắng)
+    formattedContent = formattedContent.replace(/((?<!Điều: Điều\s{0,10}))(\d+\.\s)/g, function(match, p1, p2) {
+        if (p1 === "") return "<br>" + p2;
+        return p1 + p2;
     });
-    // Nếu chưa có <br> phía trước số thứ tự (ví dụ: bị dính liền), thì thêm vào
-    formattedContent = formattedContent.replace(/([^<br>])((\d+\.\s))/g, '$1<br>$2');
-
-    // Loại bỏ <br> dư ở đầu nếu có
     formattedContent = formattedContent.replace(/^<br>/, "");
 
-    // Tạo overlay để hiển thị nội dung phóng to
     const overlay = $(`
         <div class="fullscreen-overlay">
             <div class="fullscreen-document">
@@ -280,14 +274,12 @@ function openFullscreenDocument(content) {
         </div>
     `);
 
-    // Thêm sự kiện click vào overlay để đóng khi nhấp ra bên ngoài tài liệu
     overlay.on('click', function(e) {
         if ($(e.target).is('.fullscreen-overlay')) {
-            overlay.remove(); // Đóng overlay khi click vào vùng tối
+            overlay.remove();
         }
     });
 
-    // Thêm overlay vào body
     $('body').append(overlay);
 }
 

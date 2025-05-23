@@ -6,6 +6,7 @@ from source.model.embedding_model import Sentences_Transformer_Embedding
 from source.model.extract_model import Bert_Extract
 from source.model.generate_model import Gemini
 from source.model.rerank_model import Cohere
+from source.model.rerank_model_finetune import RerankModelFinetune
 from source.data.vectordb.qdrant import Qdrant_Vector
 from source.core.config import Settings
 from source.generate.generate import Gemini_Generate
@@ -18,7 +19,8 @@ bert=Bert_Extract(setting)
 sentences_transformer_embedding=Sentences_Transformer_Embedding(setting)
 qdrant=Qdrant_Vector(setting,sentences_transformer_embedding)
 router = APIRouter()
-rerank_Utils=Rerank_Utils(cohere)
+model_finetune = RerankModelFinetune()
+rerank_Utils=Rerank_Utils(cohere, model_finetune)
 extract_Utils= Extract_Information(bert)
 generate_Utils=Gemini_Generate(gemini,setting)
 qdrant_Utils=Qdrant_Utils(qdrant, generate_Utils)
