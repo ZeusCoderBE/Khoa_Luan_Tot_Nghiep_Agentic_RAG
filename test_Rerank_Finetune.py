@@ -10,11 +10,11 @@ df = pd.read_csv(csv_path)
 df = df.head(150)
 
 # Chuẩn bị file Excel
-excel_path = 'test_Rerank_Finetune.xlsx'
+excel_path = 'test_Rerank_Cohere.xlsx' # test_Rerank_Finetune.xlsx
 wb = Workbook()
 ws = wb.active
 ws.title = 'Results'
-ws.append(['question', 'answer', 'answerSystemFinetune'])
+ws.append(['question', 'answer', 'answerSystemCohere'])
 
 # Đảm bảo font tiếng Việt không bị lỗi
 for col in range(1, 4):

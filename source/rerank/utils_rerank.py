@@ -41,36 +41,38 @@ class Rerank_Utils():
             return []
     
     def rerank_documents(self,query,documents) -> List[Tuple[str, float]]:
-            doc_contents = [(doc).replace("_"," ").replace(' .', '.').replace(' ,', ',').replace(' !', '!').replace(' ?', '?').replace(' :', ':').replace(' ;', ';') for doc,_ in documents]
-            try:
-                co = ClientV2(self.model_rerank.key_manager.get_next_key())
-                response = co.rerank(
-                    model=self.model_rerank.model_cohere,
-                    query=query,
-                    documents=doc_contents,
-                    top_n=5,
-                )
-                reranked_results = response.results
-                # print("\n=== Kết quả từ Cohere Rerank ===")
-                # for idx, result in enumerate(reranked_results, 1):
-                #     print(f"\n--- Kết quả #{idx} ---")
-                #     print(f"Điểm số: {result.relevance_score:.4f}")
-                #     print(f"Index: {result.index}")
-                #     print(f"Nội dung: {doc_contents[result.index][:200]}...")
-                
-                ranked_documents = [documents[res.index] for res in reranked_results]
-                
-                # print("\n=== Kết quả cuối cùng sau khi xếp hạng ===")
-                # for idx, (doc, score) in enumerate(ranked_documents, 1):
-                #     print(f"\n--- Kết quả #{idx} ---")
-                #     print(f"Điểm số: {score}")
-                #     print(f"Nội dung: {doc[:200]}...")
-                
-            except Exception as e:
-                print(f"An error occurred: {e}")
-            return ranked_documents  
+        print("Đang sử dụng mô hình Cohere để xếp hạng lại tài liệu.")
+        doc_contents = [(doc).replace("_"," ").replace(' .', '.').replace(' ,', ',').replace(' !', '!').replace(' ?', '?').replace(' :', ':').replace(' ;', ';') for doc,_ in documents]
+        try:
+            co = ClientV2(self.model_rerank.key_manager.get_next_key())
+            response = co.rerank(
+                model=self.model_rerank.model_cohere,
+                query=query,
+                documents=doc_contents,
+                top_n=5,
+            )
+            reranked_results = response.results
+            # print("\n=== Kết quả từ Cohere Rerank ===")
+            # for idx, result in enumerate(reranked_results, 1):
+            #     print(f"\n--- Kết quả #{idx} ---")
+            #     print(f"Điểm số: {result.relevance_score:.4f}")
+            #     print(f"Index: {result.index}")
+            #     print(f"Nội dung: {doc_contents[result.index][:200]}...")
+            
+            ranked_documents = [documents[res.index] for res in reranked_results]
+            
+            # print("\n=== Kết quả cuối cùng sau khi xếp hạng ===")
+            # for idx, (doc, score) in enumerate(ranked_documents, 1):
+            #     print(f"\n--- Kết quả #{idx} ---")
+            #     print(f"Điểm số: {score}")
+            #     print(f"Nội dung: {doc[:200]}...")
+            
+        except Exception as e:
+            print(f"An error occurred: {e}")
+        return ranked_documents  
     
     def rerank_documents_finetune(self,query,documents) -> List[Tuple[str, float]]:
+        print("Đang sử dụng mô hình fine-tune để xếp hạng lại tài liệu.")
         if len(documents) > 50:
             raise ValueError("Số lượng documents không được vượt quá 50.")
             
