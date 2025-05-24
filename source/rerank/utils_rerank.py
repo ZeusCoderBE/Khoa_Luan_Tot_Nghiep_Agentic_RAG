@@ -1,12 +1,11 @@
 from typing import List,Tuple
 from source.model.rerank_model import Cohere
 from cohere import ClientV2
-from source.model.rerank_model_finetune import RerankModelFinetune
+from source.model.rerank_model import Cohere
 
 class Rerank_Utils():
-    def __init__(self,model_rerank:Cohere, model_finetune:RerankModelFinetune):
+    def __init__(self,model_rerank:Cohere):
          self.model_rerank=model_rerank
-         self.model_finetune = model_finetune
     
     def reciprocal_rank_fusion(self,documents_nested, k=60):
         document_scores = {}  
@@ -81,7 +80,7 @@ class Rerank_Utils():
         doc_contents = [(doc).replace("_"," ").replace(' .', '.').replace(' ,', ',').replace(' !', '!').replace(' ?', '?').replace(' :', ':').replace(' ;', ';') for doc in doc_contents]
         try:
             pairs = [(query, doc) for doc in doc_contents]
-            scores = self.model_finetune.predict(pairs)
+            scores = self.model_rerank.predict(pairs)
             scores = [float(score) for score in scores]
             ranked = sorted(zip(scores, range(len(doc_contents))), key=lambda x: x[0], reverse=True)
             return [(doc_contents[idx], {'score': score, 'doc_metadata': doc_metadata[idx]}) for score, idx in ranked[:5]]

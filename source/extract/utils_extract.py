@@ -11,6 +11,7 @@ class Extract_Information():
         try:
             for idx,(context) in enumerate(contexts):
                 context=ViTokenizer.tokenize(context)
+                print(f"{context} \n")
                 inputs = self.bert.tokenizer(
                 question,
                 context,
