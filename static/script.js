@@ -81,7 +81,7 @@ $('#toggle-search-web').on('click', function() {
     $(this).toggleClass('active', isSearchWebMode);
     if (isSearchWebMode) {
         $(this).find('span').text('🌐 Search');
-        $('#user-query').attr('placeholder', 'Tìm kiếm trên web...');
+        $('#user-query').attr('placeholder', 'Trả lời dùng Search Tool ...');
     } else {
         $(this).find('span').text('Chat');
         $('#user-query').attr('placeholder', 'Nhập tin nhắn ...');
@@ -334,6 +334,10 @@ function startNewSession() {
                 </div>
             `;
             $('#chat-output').append(defaultMessage);
+            // Reset về chế độ chat thường khi new chat
+            isSearchWebMode = false;
+            $('#toggle-search-web').removeClass('active').find('span').text('Chat');
+            $('#user-query').attr('placeholder', 'Nhập tin nhắn ...');
             updateSearchWebButtonState(); // Enable Search Web button
         },
         error: function () {
