@@ -59,7 +59,7 @@ body {
 /* Đặt nút New Chat ở bên phải, cùng top với toggle-button */
 [data-testid="create-new-chat-button"] {
     position: absolute;
-    right: 10px;
+    right: 5px;
     top: 10px;
   }
   
@@ -617,4 +617,14 @@ button:disabled {
         opacity: 1;
         transform: translateY(-50%) translateX(0);
     }
+}
+
+#new-chat:hover {
+    background-color: #ECECEC; /* Màu nền xám nhạt giống sidebar */
+    color: #181818;            /* Màu icon mặc định */
+    border-radius: 15%;        /* Giữ bo tròn */
+    box-shadow: none;          /* Không bóng đổ */
+    border: none;              /* Không viền */
+    transform: none;           /* Không phóng to */
+    transition: background 0.2s, color 0.2s;
 }
