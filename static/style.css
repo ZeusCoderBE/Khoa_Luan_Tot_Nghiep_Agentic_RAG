@@ -628,3 +628,23 @@ button:disabled {
     transform: none;           /* Không phóng to */
     transition: background 0.2s, color 0.2s;
 }
+
+.search-web-btn {
+    background: #fff;
+    border: 1px solid #19c37d;
+    color: #19c37d;
+    border-radius: 12px;
+    padding: 0 16px;
+    height: 40px;
+    margin-right: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.search-web-btn.active, .search-web-btn:active {
+    background: #19c37d;
+    color: #fff;
+}
