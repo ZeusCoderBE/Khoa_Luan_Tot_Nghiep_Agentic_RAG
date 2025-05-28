@@ -28,6 +28,7 @@ $(document).ready(function() {
         $toggleButton.attr('title', 'Close Sidebar');
         $newChat.attr('title', 'New Chat');
     }
+    updateSearchWebButtonState();
 });
 
 const $userInput = $('#user-query');
@@ -63,8 +64,18 @@ $('#user-query').on('keydown', function(event) {
 // Thêm biến trạng thái chế độ Search Web
 let isSearchWebMode = false;
 
+// Hàm cập nhật trạng thái nút Search Web
+function updateSearchWebButtonState() {
+    if (currentSessionId) {
+        $('#toggle-search-web').prop('disabled', false).removeClass('disabled');
+    } else {
+        $('#toggle-search-web').prop('disabled', true).addClass('disabled');
+    }
+}
+
 // Xử lý sự kiện click cho nút Search Web
 $('#toggle-search-web').on('click', function() {
+    if ($(this).prop('disabled')) return;
     console.log('Đã click Search Web!');
     isSearchWebMode = !isSearchWebMode;
     $(this).toggleClass('active', isSearchWebMode);
@@ -323,6 +334,7 @@ function startNewSession() {
                 </div>
             `;
             $('#chat-output').append(defaultMessage);
+            updateSearchWebButtonState(); // Enable Search Web button
         },
         error: function () {
             alert("Error: Unable to start new session.");
@@ -559,6 +571,7 @@ function loadChatHistory(sessionId) {
 
             currentSessionId = sessionId;
             localStorage.setItem('session_id', sessionId);
+            updateSearchWebButtonState(); // Enable Search Web button
         },
         error: function () {
             console.error("Error loading chat history.");
