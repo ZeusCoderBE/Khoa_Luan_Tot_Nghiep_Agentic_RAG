@@ -12,6 +12,9 @@ from source.core.config import Settings
 from source.generate.generate import Gemini_Generate
 from source.extract.utils_extract import Extract_Information
 from source.schema.chatbot_querry import ChatbotQuery
+from source.tool.utils_search import Utils_Search_Tools
+from source.tool.google_search import GoogleSearchTool
+
 setting=Settings()
 gemini=Gemini(setting)
 cohere=Cohere(setting)
@@ -25,6 +28,23 @@ extract_Utils= Extract_Information(bert)
 generate_Utils=Gemini_Generate(gemini,setting)
 qdrant_Utils=Qdrant_Utils(qdrant, generate_Utils)
 rag=RAG(generate_Utils,extract_Utils,qdrant_Utils,rerank_Utils,setting,sentences_transformer_embedding)
+
+# Khởi tạo các tools cần thiết cho web search
+google_search_tools = GoogleSearchTool(setting)
+search_tools = Utils_Search_Tools(setting, generate_Utils, extract_Utils, google_search_tools)
+
+@router.post("/chatbot-with-search-web")
+def chatbot_with_search_web(query: ChatbotQuery):
+    try:
+        user_input = query.query
+        answer, relevant_links = search_tools.Search_Docs_From_Tools(user_input)
+        return {
+            "answer": answer,
+            "lst_Relevant_Documents": relevant_links
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing request: {str(e)}")
+
 @router.post("/chatbot-with-gemini")
 def chatbot_with_gemini(query: ChatbotQuery):
     try:

@@ -363,7 +363,6 @@ button:disabled {
     text-overflow: ellipsis;
     white-space: nowrap;
     transition: transform 0.3s ease;
-    padding: 12px;
     margin: 0;
     box-sizing: border-box;
 }

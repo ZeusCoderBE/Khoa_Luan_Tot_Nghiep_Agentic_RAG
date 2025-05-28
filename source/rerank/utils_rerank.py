@@ -1,11 +1,12 @@
 from typing import List,Tuple
 from source.model.rerank_model import Cohere
 from cohere import ClientV2
-from source.model.rerank_model import Cohere
+from source.model.rerank_model_finetune import RerankModelFinetune
 
 class Rerank_Utils():
-    def __init__(self,model_rerank:Cohere):
+    def __init__(self,model_rerank:Cohere, model_finetune:RerankModelFinetune):
          self.model_rerank=model_rerank
+         self.model_finetune = model_finetune
     
     def reciprocal_rank_fusion(self,documents_nested, k=60):
         document_scores = {}  
