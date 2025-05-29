@@ -78,3 +78,28 @@ def fix_json_string(s):
     # Thay lại trong chuỗi gốc
     s_fixed = s.replace(answer_str, answer_fixed)
     return s_fixed
+
+def fix_and_load_json_plus(raw_json_str):
+    """
+    Chuyển chuỗi JSON có "answer" dùng nháy đơn thành chuẩn JSON rồi load dict.
+    """
+    def replacer(match):
+        key = match.group(1)  # "answer":
+        val = match.group(2)  # nội dung trong nháy đơn
+        comma = match.group(3)  # dấu phẩy hoặc đóng ngoặc
+
+        # Dùng json.dumps để escape chuỗi đúng chuẩn JSON (bao gồm cả dấu nháy kép, dấu xuống dòng,...)
+        val_escaped = json.dumps(val)  # kết quả đã có dấu nháy kép ở đầu cuối
+
+        # json.dumps trả về string dạng "nội dung", ta chỉ cần lấy nguyên như vậy
+        return f'{key}{val_escaped}{comma}'
+
+    fixed_json = re.sub(
+        r'("answer"\s*:\s*)\'(.*?)\'(\s*[},])',
+        replacer,
+        raw_json_str,
+        flags=re.DOTALL
+    )
+
+    return json.loads(fixed_json)
+

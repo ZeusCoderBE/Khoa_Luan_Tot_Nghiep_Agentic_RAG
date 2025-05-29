@@ -18,8 +18,6 @@ class Qdrant_Utils():
             timeout=300,
             filter=filter
         )
-        if search_results:
-            print("Tìm được")
         return search_results
     def build_metadata_filter(self, entity_dict: dict) -> Filter:
         conditions = []

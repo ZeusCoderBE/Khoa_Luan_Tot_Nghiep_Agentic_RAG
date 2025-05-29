@@ -5,7 +5,7 @@ from source.model.rerank_model import Cohere
 
 class Rerank_Utils():
     def __init__(self,model_rerank:Cohere):
-         self.model_rerank=model_rerank
+         self.model_rerank=model_rerank.rerank
     
     def reciprocal_rank_fusion(self,documents_nested, k=60):
         document_scores = {}  
@@ -71,7 +71,6 @@ class Rerank_Utils():
         return ranked_documents  
     
     def rerank_documents_finetune(self,query,documents) -> List[Tuple[str, float]]:
-        print("Đang sử dụng mô hình fine-tune để xếp hạng lại tài liệu.")
         if len(documents) > 50:
             raise ValueError("Số lượng documents không được vượt quá 50.")
             
