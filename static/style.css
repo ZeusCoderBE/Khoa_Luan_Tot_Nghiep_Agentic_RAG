@@ -59,7 +59,7 @@ body {
 /* Đặt nút New Chat ở bên phải, cùng top với toggle-button */
 [data-testid="create-new-chat-button"] {
     position: absolute;
-    right: 10px;
+    right: 5px;
     top: 10px;
   }
   
@@ -343,17 +343,15 @@ button:disabled {
 .documents-wrapper {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
-    align-items: stretch;
     gap: 16px;
-    max-width: 900px;   /* Giới hạn chiều rộng tối đa */
-    margin: 0 auto;     /* Căn giữa wrapper */
-    width: 100%;
+    flex-wrap: wrap; /* Cho phép xuống dòng nếu nhiều thẻ */
+    justify-content: flex-start;
 }
 
 .relevant-document {
-    flex: 1 1 0;
-    min-width: 0;
+    flex: 0 0 220px; /* Luôn giữ chiều rộng cố định, ví dụ 220px */
+    max-width: 220px;
+    min-width: 180px;
     background-color: #f9f9f9;
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -363,7 +361,6 @@ button:disabled {
     text-overflow: ellipsis;
     white-space: nowrap;
     transition: transform 0.3s ease;
-    padding: 12px;
     margin: 0;
     box-sizing: border-box;
 }
@@ -620,4 +617,34 @@ button:disabled {
         opacity: 1;
         transform: translateY(-50%) translateX(0);
     }
+}
+
+#new-chat:hover {
+    background-color: #ECECEC; /* Màu nền xám nhạt giống sidebar */
+    color: #181818;            /* Màu icon mặc định */
+    border-radius: 15%;        /* Giữ bo tròn */
+    box-shadow: none;          /* Không bóng đổ */
+    border: none;              /* Không viền */
+    transform: none;           /* Không phóng to */
+    transition: background 0.2s, color 0.2s;
+}
+
+.search-web-btn {
+    background: #fff;
+    border: 1px solid #19c37d;
+    color: #19c37d;
+    border-radius: 12px;
+    padding: 0 16px;
+    height: 40px;
+    margin-right: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.search-web-btn.active, .search-web-btn:active {
+    background: #19c37d;
+    color: #fff;
 }

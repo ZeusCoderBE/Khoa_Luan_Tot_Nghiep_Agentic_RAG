@@ -28,9 +28,9 @@ class RAG():
     def get_gemini_response_rag_final(self,user_query):
         article_documents = self.qdrant_utils.search_With_Similarity_Queries(user_query)
         rrf_result_docs=self.rerank_utils.reciprocal_rank_fusion(article_documents)
-        print(f"Số document khi xoá trùng {len(rrf_result_docs)}")
+        # print(f"Số document khi xoá trùng {len(rrf_result_docs)}")
         rerank_article_documents = self.rerank_utils.rerank_documents_finetune(user_query,rrf_result_docs) # .rerank_documents_finetune nếu dùng model 5tune
-        print(f"Số document sau khi qua rerank: {len(rerank_article_documents)}")
+        # print(f"Số document sau khi qua rerank: {len(rerank_article_documents)}")
         result_gemini=self.generate.generate_response(user_query,rerank_article_documents)
         answer_result= clean_code_fence_safe(result_gemini)
         answer_result= fix_json_string(answer_result)
@@ -45,11 +45,11 @@ class RAG():
                 return self.generate.invalid_query(user_Query),""
         elif check==1:
             article_documents = self.qdrant_utils.search_With_Similarity_Queries(user_Query)
-            print("Đã thực hiện xong retrival")
-            print(f"Số document retrival được {len(article_documents)}")
+            # print("Đã thực hiện xong retrival")
+            # print(f"Số document retrival được {len(article_documents)}")
             rrf_result_docs=self.rerank_utils.reciprocal_rank_fusion(article_documents)
             print(f"Số document khi xoá trùng {len(rrf_result_docs)}")
-            rerank_article_documents = self.rerank_utils.rerank_documents(user_Query,rrf_result_docs) # .rerank_documents_finetune nếu dùng model 5tune
+            rerank_article_documents = self.rerank_utils.rerank_documents_finetune(user_Query,rrf_result_docs) # .rerank_documents_finetune nếu dùng model 5tune
             print(f"Số document sau khi qua rerank: {len(rerank_article_documents)}")
             lst_Article_Quote = []
             article_Content_Resuls=[]
@@ -60,9 +60,10 @@ class RAG():
                 result_gemini=self.generate.generate_response(user_Query,document_reduce)
                 answer_result= clean_code_fence_safe(result_gemini)
                 answer_result= fix_json_string(answer_result)
-                answer_result= json.loads(answer_result)
+                answer_result= fix_and_load_json_plus(answer_result)
                 selected_keys = answer_result["key"]
                 answer_result = answer_result['answer']
+                print(answer_result)
                 if selected_keys :
                     selected_documents = [rerank_article_documents[i] for i in selected_keys]
                     lst_Article_Quote = [

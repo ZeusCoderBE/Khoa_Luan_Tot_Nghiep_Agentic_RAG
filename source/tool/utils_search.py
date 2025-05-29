@@ -22,7 +22,11 @@ class Utils_Search_Tools:
             lst_docs=self.google_search_tools.extract_texts_from_links(lst_links)
             lst_reduce_docs=self.extract_func.predict(lst_docs,query)
             result_final=self.gemini_func.generate_response(query,lst_reduce_docs)
-            return result_final
+            answer_result=clean_code_fence_safe(result_final)
+            answer_result=fix_json_string(answer_result)
+            answer_result = json.loads(answer_result)
+            relevant_links = [lst_links[i] for i in answer_result['key']]
+            return answer_result['answer'], relevant_links
         except Exception as e :
             print("Đang bị lỗi"+e)
-            return ""
+            return "", []

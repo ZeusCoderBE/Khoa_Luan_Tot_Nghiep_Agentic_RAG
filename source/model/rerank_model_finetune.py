@@ -1,8 +1,6 @@
 from sentence_transformers import CrossEncoder
-
+import torch
+from source.core.config import Settings
 class RerankModelFinetune:
-    def __init__(self, model_repo="hghaan/rerank_model", device="cuda"):
-        self.model = CrossEncoder(model_repo, trust_remote_code=True, device=device)
-
-    def predict(self, pairs):
-        return self.model.predict(pairs) 
+    def __init__(self,setting:Settings ):
+        self.model = CrossEncoder(setting.RERANK, trust_remote_code=True, device='cuda' if torch.cuda.is_available() else 'cpu')

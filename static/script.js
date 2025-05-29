@@ -28,6 +28,7 @@ $(document).ready(function() {
         $toggleButton.attr('title', 'Close Sidebar');
         $newChat.attr('title', 'New Chat');
     }
+    updateSearchWebButtonState();
 });
 
 const $userInput = $('#user-query');
@@ -57,6 +58,33 @@ $('#user-query').on('keydown', function(event) {
     if (event.key === 'Enter') {
         event.preventDefault();
         sendMessage();
+    }
+});
+
+// Thêm biến trạng thái chế độ Search Web
+let isSearchWebMode = false;
+
+// Hàm cập nhật trạng thái nút Search Web
+function updateSearchWebButtonState() {
+    if (currentSessionId) {
+        $('#toggle-search-web').prop('disabled', false).removeClass('disabled');
+    } else {
+        $('#toggle-search-web').prop('disabled', true).addClass('disabled');
+    }
+}
+
+// Xử lý sự kiện click cho nút Search Web
+$('#toggle-search-web').on('click', function() {
+    if ($(this).prop('disabled')) return;
+    console.log('Đã click Search Web!');
+    isSearchWebMode = !isSearchWebMode;
+    $(this).toggleClass('active', isSearchWebMode);
+    if (isSearchWebMode) {
+        $(this).find('span').text('🌐 Search');
+        $('#user-query').attr('placeholder', 'Trả lời dùng Search Tool ...');
+    } else {
+        $(this).find('span').text('Chat');
+        $('#user-query').attr('placeholder', 'Nhập tin nhắn ...');
     }
 });
 
@@ -120,8 +148,11 @@ function sendMessage() {
         $typingIndicator.find('.time-count').text(formattedTime);
     }, 1000);
 
+    let apiUrl = isSearchWebMode
+        ? 'http://127.0.0.1:8000/api/chat/chatbot-with-search-web'
+        : 'http://127.0.0.1:8000/api/chat/chatbot-with-gemini';
     $.ajax({
-        url: 'http://127.0.0.1:8000/api/chat/chatbot-with-gemini',
+        url: apiUrl,
         type: 'POST',
         contentType: 'application/json',
         data: JSON.stringify({ query: query }),
@@ -130,10 +161,7 @@ function sendMessage() {
                 clearInterval(updateTimeInterval);
                 $typingIndicator.remove();
                 processResponse(data);
-
-                // Lưu tin nhắn của chatbot và tài liệu tham khảo vào database
                 saveMessage(currentSessionId, 'bot', data.answer, data.lst_Relevant_Documents);
-
                 $chatOutput.scrollTop($chatOutput.prop('scrollHeight'));
                 isLoading = false;
                 updateSendButtonState();
@@ -207,20 +235,19 @@ function displayRelevantDocuments(documents) {
     container.append(documentsWrapper);
 
     documents.forEach((doc, index) => {
-        // Giới hạn nội dung hiển thị (ví dụ: 100 ký tự đầu tiên)
-        const shortContent = doc.length > 100 ? doc.substring(0, 100) + '...' : doc;
+        // Nếu là link (http/https) thì render ra link
+        if (typeof doc === 'string' && doc.startsWith('http')) {
+            const docElement = $(`
+                <div class="relevant-document">
+                    <a href="${doc}" target="_blank" rel="noopener noreferrer">${doc}</a>
+                </div>
+            `);
+            documentsWrapper.append(docElement);
+            return;
+        }
 
-        // Tạo thẻ cho document
-        const docElement = $(`
-            <div class="relevant-document" data-full-content="${doc}">
-                ${shortContent}
-            </div>
-        `);
-
-        // Lấy phần metadata từ chuỗi trích dẫn tài liệu
+        // Nếu là tài liệu có metadata thì giữ nguyên logic cũ
         const parts = doc.split('<=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=>');
-
-        // Kiểm tra nếu có ít nhất hai phần (metadata và nội dung)
         if (parts.length > 1) {
             const contentPart = parts[1].trim(); // Metadata phần đầu tiên
             const metadataPart = parts[0].trim();  // Nội dung tài liệu phần thứ hai
@@ -307,6 +334,11 @@ function startNewSession() {
                 </div>
             `;
             $('#chat-output').append(defaultMessage);
+            // Reset về chế độ chat thường khi new chat
+            isSearchWebMode = false;
+            $('#toggle-search-web').removeClass('active').find('span').text('Chat');
+            $('#user-query').attr('placeholder', 'Nhập tin nhắn ...');
+            updateSearchWebButtonState(); // Enable Search Web button
         },
         error: function () {
             alert("Error: Unable to start new session.");
@@ -543,6 +575,7 @@ function loadChatHistory(sessionId) {
 
             currentSessionId = sessionId;
             localStorage.setItem('session_id', sessionId);
+            updateSearchWebButtonState(); // Enable Search Web button
         },
         error: function () {
             console.error("Error loading chat history.");

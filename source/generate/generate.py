@@ -36,10 +36,8 @@ class Gemini_Generate():
         return queries    
     def generate_response(self,query: str,docs) -> str:
         # docs = "\n".join(f"{k}: {v}" for k, v in docs.items())
-        doc_contents = [(doc).replace("_"," ").replace(' .', '.').replace(' ,', ',').replace(' !', '!').replace(' ?', '?').replace(' :', ':').replace(' ;', ';') for doc,_ in docs]
-        docs_dict = {i: doc for i, doc in enumerate(doc_contents)}
+        docs_dict = {i: doc for i, doc in enumerate(docs)}
         docs_str = "\n".join(f"{k}: {v}" for k, v in docs_dict.items())
-
         prompt_template=load_prompt_from_yaml(self.yaml_path,"response")
         response_model = ChatGoogleGenerativeAI(
             google_api_key=self.gemini_model.key_manager.get_next_key(),
