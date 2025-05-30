@@ -285,21 +285,31 @@ function displayRelevantDocuments(documents) {
 
 // Hàm mở nội dung đầy đủ khi click vào Trích dẫn
 function openFullscreenDocument(content) {
-    let formattedContent = content.replace(/\n/g, "<br>");
-    // Thêm <br> trước số thứ tự, nhưng không thêm nếu trước đó là 'Điều: Điều' (có thể có khoảng trắng)
-    formattedContent = formattedContent.replace(/((?<!Điều: Điều\s{0,10}))(\d+\.\s)/g, function(match, p1, p2) {
-        if (p1 === "") return "<br>" + p2;
-        return p1 + p2;
-    });
-    formattedContent = formattedContent.replace(/^<br>/, "");
+    // Tách phần metadata và phần nội dung
+    const parts = content.split('<=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=>');
+    let metadata = parts[0] || '';
+    let mainContent = parts[1] || '';
 
-    const overlay = $(`
-        <div class="fullscreen-overlay">
+    // Xử lý metadata: chỉ thay \n thành <br>
+    metadata = metadata.replace(/\n/g, "<br>");
+
+    // Xử lý mainContent:
+    // 1. Thay \n thành <br>
+    mainContent = mainContent.replace(/\n/g, "<br>");
+    // 2. Chèn <br> trước mọi số thứ tự (1., 2., ...)
+    mainContent = mainContent.replace(/(\d+\.\s)/g, '<br>$1');
+    mainContent = mainContent.replace(/^<br>/, "");
+
+    // Ghép lại
+    let formattedContent = metadata + '<br><b><=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=></b><br><br>' + mainContent;
+
+    const overlay = $(
+        `<div class="fullscreen-overlay">
             <div class="fullscreen-document">
                 <div class="document-content">${formattedContent}</div>
             </div>
-        </div>
-    `);
+        </div>`
+    );
 
     overlay.on('click', function(e) {
         if ($(e.target).is('.fullscreen-overlay')) {

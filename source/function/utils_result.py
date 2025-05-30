@@ -63,7 +63,7 @@ class RAG():
                 answer_result= fix_and_load_json_plus(answer_result)
                 selected_keys = answer_result["key"]
                 answer_result = answer_result['answer']
-                print(answer_result)
+                # print(answer_result)
                 if selected_keys :
                     selected_documents = [rerank_article_documents[i] for i in selected_keys]
                     lst_Article_Quote = [
@@ -78,7 +78,7 @@ class RAG():
                         Chương: {infor['doc_metadata'].get("Chapter", "")}
                         Mục: {infor['doc_metadata'].get("Section", "")}
                         Tiểu mục: {infor['doc_metadata'].get("MiniSection", "")}
-                        Điều: {infor['doc_metadata'].get("Article", "")}
+                        {infor['doc_metadata'].get("Article", "")}
                         <=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=>
                         {doc.replace("_", " ").replace(' .', '.').replace(' ,', ',').replace(' !', '!').replace(' ?', '?').replace(' :', ':').replace(' ;', ';')}
                         """ 
