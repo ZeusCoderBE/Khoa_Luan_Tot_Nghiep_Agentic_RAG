@@ -148,25 +148,81 @@ function sendMessage() {
         $typingIndicator.find('.time-count').text(formattedTime);
     }, 1000);
 
-    let apiUrl = isSearchWebMode
-        ? 'http://127.0.0.1:8000/api/chat/chatbot-with-search-web'
-        : 'http://127.0.0.1:8000/api/chat/chatbot-with-gemini';
+    // Thử với Gemini trước
     $.ajax({
-        url: apiUrl,
+        url: 'http://127.0.0.1:8000/api/chat/chatbot-with-gemini',
         type: 'POST',
         contentType: 'application/json',
         data: JSON.stringify({ query: query }),
         success: function(data) {
-            setTimeout(() => {
-                clearInterval(updateTimeInterval);
-                $typingIndicator.remove();
+            clearInterval(updateTimeInterval);
+            $typingIndicator.remove();
+
+            // Kiểm tra nếu câu trả lời là thông báo không biết
+            if (data.answer.includes("Xin lỗi bạn. Kiến thức này nằm ngoài phạm vi hiểu biết của tôi. Bạn có thể hỏi tôi một câu hỏi khác không? Tôi sẽ cố gắng giải đáp câu hỏi của bạn!")) {
+                // Chuyển sang tìm kiếm web ngay lập tức
+                searchWeb(query);
+            } else {
+                // Nếu câu trả lời bình thường, xử lý như cũ
                 processResponse(data);
                 saveMessage(currentSessionId, 'bot', data.answer, data.lst_Relevant_Documents);
                 $chatOutput.scrollTop($chatOutput.prop('scrollHeight'));
                 isLoading = false;
                 updateSendButtonState();
                 $('#loading-indicator').text("");
-            }, 800);
+            }
+        }
+    });
+}
+
+// Thêm hàm mới để xử lý tìm kiếm web
+function searchWeb(query) {
+    const $chatOutput = $('#chat-output');
+    
+    // Hiển thị thông báo kết hợp
+    const $combinedMessage = $(`
+        <div class="chat-message bot">
+            <div class="avatar bot-avatar" style="background-image: url('https://media.istockphoto.com/id/1333838449/vector/chatbot-icon-support-bot-cute-smiling-robot-with-headset-the-symbol-of-an-instant-response.jpg?s=612x612&w=0&k=20&c=sJ_uGp9wJ5SRsFYKPwb-dWQqkskfs7Fz5vCs2w5w950=');"></div>
+            <div class="message">
+                <div class="transition-text" style="margin-bottom: 10px;">Xin lỗi bạn. Kiến thức này nằm ngoài phạm vi hiểu biết của tôi. Tôi sẽ tiến hành tìm kiếm thông qua kết quả bên ngoài</div>
+                <div class="searching-text" style="font-size: 14px; color: rgba(0, 0, 0, 0.6); display: flex; align-items: center;">
+                    Đang tìm kiếm thông tin từ web
+                    <div class="time-count" style="margin-left: 5px; margin-right: 5px;">00:00</div>
+                    <span>.</span><span>.</span><span>.</span>
+                </div>
+            </div>
+        </div>
+    `);
+    $chatOutput.append($combinedMessage);
+    $chatOutput.scrollTop($chatOutput.prop('scrollHeight'));
+
+    // Khởi tạo thời gian bắt đầu
+    const startTime = Date.now();
+
+    // Cập nhật số phút và giây
+    const updateTimeInterval = setInterval(() => {
+        const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+        const minutes = Math.floor(elapsedTime / 60);
+        const seconds = elapsedTime % 60;
+        const formattedTime = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        $combinedMessage.find('.time-count').text(formattedTime);
+    }, 1000);
+
+    // Gọi API tìm kiếm web
+    $.ajax({
+        url: 'http://127.0.0.1:8000/api/chat/chatbot-with-search-web',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ query: query }),
+        success: function(data) {
+            clearInterval(updateTimeInterval);
+            $combinedMessage.remove();
+            processResponse(data);
+            saveMessage(currentSessionId, 'bot', data.answer, data.lst_Relevant_Documents);
+            $chatOutput.scrollTop($chatOutput.prop('scrollHeight'));
+            isLoading = false;
+            updateSendButtonState();
+            $('#loading-indicator').text("");
         }
     });
 }
