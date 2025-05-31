@@ -282,22 +282,33 @@ function displayRelevantDocuments(documents) {
     const container = $('#relevant-documents-container');
     container.empty(); // Xóa các thẻ cũ nếu có
 
-    // Tạo div chứa tiêu đề
-    const title = $('<div class="references-title">Trích dẫn tham khảo</div>');
-    container.append(title);
+    // Tạo header collapsible
+    const header = $(`
+        <div class="references-collapsible-header">
+            <span class="references-collapsible-arrow">▶</span>
+            <span>Trích dẫn tham khảo</span>
+        </div>
+    `);
+    container.append(header);
+
+    // Tạo content collapsible
+    const content = $('<div class="references-collapsible-content"></div>');
+    container.append(content);
 
     // Tạo một div riêng cho các thẻ tài liệu
     const documentsWrapper = $('<div class="documents-wrapper"></div>');
-    container.append(documentsWrapper);
+    content.append(documentsWrapper);
 
     documents.forEach((doc, index) => {
-        // Nếu là link (http/https) thì render ra link
+        // Nếu là link (http/https) thì render ra link với icon link
         if (typeof doc === 'string' && doc.startsWith('http')) {
-            const docElement = $(`
-                <div class="relevant-document">
-                    <a href="${doc}" target="_blank" rel="noopener noreferrer">${doc}</a>
-                </div>
-            `);
+            const docElement = $(
+                `<div class="relevant-document">
+                    <span class="doc-icon">🔗</span>
+                    <div class="doc-title">Link tham khảo</div>
+                    <div class="doc-content"><a href="${doc}" target="_blank" rel="noopener noreferrer">${doc}</a></div>
+                </div>`
+            );
             documentsWrapper.append(docElement);
             return;
         }
@@ -316,17 +327,17 @@ function displayRelevantDocuments(documents) {
             const loaiVanBan = loaiVanBanMatch ? loaiVanBanMatch[1] : "N/A";
             const soHieu = soHieuMatch ? soHieuMatch[1] : "N/A";
 
-            // Giới hạn nội dung hiển thị (ví dụ: 20 ký tự đầu tiên)
-            const shortContent = contentPart.length > 20 ? contentPart.substring(0, 20) + '...' : contentPart;
+            // Giới hạn nội dung hiển thị (ví dụ: 40 ký tự đầu tiên, 2 dòng)
+            const shortContent = contentPart.length > 40 ? contentPart.substring(0, 40) + '...' : contentPart;
 
             // Tạo nội dung thẻ tài liệu mới
-            const docElement = $(`
-                <div class="relevant-document" data-full-content="${doc}">
-                    ${loaiVanBan} ${soHieu}
-                    <hr class="custom-hr">
-                    ${shortContent}
-                </div>
-            `);
+            const docElement = $(
+                `<div class="relevant-document" data-full-content="${doc}">
+                    <span class="doc-icon">📄</span>
+                    <div class="doc-title">${loaiVanBan} ${soHieu}</div>
+                    <div class="doc-content">${shortContent}</div>
+                </div>`
+            );
 
             // Thêm sự kiện click để mở rộng nội dung đầy đủ
             docElement.on('click', function() {
@@ -336,6 +347,13 @@ function displayRelevantDocuments(documents) {
 
             documentsWrapper.append(docElement);
         }
+    });
+
+    // Sự kiện mở/đóng collapsible
+    header.on('click', function() {
+        const arrow = header.find('.references-collapsible-arrow');
+        content.toggleClass('open');
+        arrow.toggleClass('open');
     });
 }
 
@@ -357,7 +375,7 @@ function openFullscreenDocument(content) {
     mainContent = mainContent.replace(/^<br>/, "");
 
     // Ghép lại
-    let formattedContent = metadata + '<br><b><=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=></b><br><br>' + mainContent;
+    let formattedContent = metadata + '<br><b><=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=></b><br>' + mainContent;
 
     const overlay = $(
         `<div class="fullscreen-overlay">
