@@ -3,7 +3,7 @@ from source.search.utils_search import Qdrant_Utils
 from source.extract.utils_extract import Extract_Information
 from source.generate.generate import Gemini_Generate
 from source.core.config import Settings
-from source.function.utils_shared import load_information_from_json,search_from_json,clean_code_fence_safe,fix_json_string,fix_and_load_json_plus
+from source.function.utils_shared import load_information_from_json,search_from_json,clean_code_fence_safe,fix_json_string,parse_raw_json
 import json
 from source.model.embedding_model import Sentences_Transformer_Embedding
 class RAG():
@@ -22,7 +22,7 @@ class RAG():
         result=self.generate.generate_response(user_query,document)
         answer_result= clean_code_fence_safe(result)
         answer_result= fix_json_string(answer_result)
-        answer_result= fix_and_load_json_plus(answer_result)
+        answer_result= parse_raw_json(answer_result)
         answer_result = answer_result['answer']
         return answer_result
     def get_gemini_response_rag_final(self,user_query):
@@ -34,7 +34,7 @@ class RAG():
         result_gemini=self.generate.generate_response(user_query,rerank_article_documents)
         answer_result= clean_code_fence_safe(result_gemini)
         answer_result= fix_json_string(answer_result)
-        answer_result= fix_and_load_json_plus(answer_result)
+        answer_result= parse_raw_json(answer_result)
         return answer_result['answer']
     def get_Article_Content_Results(self,user_Query):
         check=self.generate.classify_query(user_Query)
@@ -60,7 +60,7 @@ class RAG():
                 result_gemini=self.generate.generate_response(user_Query,document_reduce)
                 answer_result= clean_code_fence_safe(result_gemini)
                 answer_result= fix_json_string(answer_result)
-                answer_result= fix_and_load_json_plus(answer_result)
+                answer_result= parse_raw_json(answer_result)
                 selected_keys = answer_result["key"]
                 answer_result = answer_result['answer']
                 print(answer_result)

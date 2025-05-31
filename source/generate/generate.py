@@ -36,6 +36,7 @@ class Gemini_Generate():
         return queries    
     def generate_response(self,query: str,docs) -> str:
         # docs = "\n".join(f"{k}: {v}" for k, v in docs.items())
+        docs = [doc for doc, _ in docs]
         docs_dict = {i: doc for i, doc in enumerate(docs)}
         docs_str = "\n".join(f"{k}: {v}" for k, v in docs_dict.items())
         prompt_template=load_prompt_from_yaml(self.yaml_path,"response")

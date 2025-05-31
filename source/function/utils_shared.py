@@ -1,6 +1,7 @@
 import yaml
 from langchain_core.prompts import ChatPromptTemplate
 from source.core.config import Settings
+import textwrap
 import os
 import json
 import re
@@ -79,27 +80,38 @@ def fix_json_string(s):
     s_fixed = s.replace(answer_str, answer_fixed)
     return s_fixed
 
-def fix_and_load_json_plus(raw_json_str):
-    """
-    Chuyển chuỗi JSON có "answer" dùng nháy đơn thành chuẩn JSON rồi load dict.
-    """
-    def replacer(match):
-        key = match.group(1)  # "answer":
-        val = match.group(2)  # nội dung trong nháy đơn
-        comma = match.group(3)  # dấu phẩy hoặc đóng ngoặc
+def parse_raw_json(raw_text: str) -> dict:
+    text = raw_text.replace('“', '"').replace('”', '"')
+    pattern = r'("answer"\s*:\s*")(.+?)("(?=\s*,\s*"key"))'
+    
+    match = re.search(pattern, text, flags=re.DOTALL)
+    if not match:
+        print("DEBUG - raw_text:\n", raw_text)
+        raise ValueError("Không tìm thấy trường 'answer' hoặc định dạng quá lệch không parse được.")
+    
+    prefix = match.group(1)
+    answer_content = match.group(2)
+    suffix = match.group(3)
 
-        # Dùng json.dumps để escape chuỗi đúng chuẩn JSON (bao gồm cả dấu nháy kép, dấu xuống dòng,...)
-        val_escaped = json.dumps(val)  # kết quả đã có dấu nháy kép ở đầu cuối
-
-        # json.dumps trả về string dạng "nội dung", ta chỉ cần lấy nguyên như vậy
-        return f'{key}{val_escaped}{comma}'
-
-    fixed_json = re.sub(
-        r'("answer"\s*:\s*)\'(.*?)\'(\s*[},])',
-        replacer,
-        raw_json_str,
-        flags=re.DOTALL
+    # Escape backslash, quotes và các ký tự xuống dòng trong answer_content
+    escaped_content = (
+        answer_content
+        .replace('\\', '\\\\')
+        .replace('"', '\\"')
+        .replace('\n', '\\n')
+        .replace('\r', '\\r')
+        .replace('\t', '\\t')
     )
 
-    return json.loads(fixed_json)
+    fixed_text = (
+        text[: match.start(1)] +
+        prefix +
+        escaped_content +
+        suffix +
+        text[match.end(3):]
+    )
+
+    fixed_text = textwrap.dedent(fixed_text).strip()
+    return json.loads(fixed_text)
+
 

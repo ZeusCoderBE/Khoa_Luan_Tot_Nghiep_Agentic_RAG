@@ -98,12 +98,13 @@ prompts:
          3. You must base your answer **entirely and exclusively** on this key list.  
          4. Do **not** reference, use, or infer from any document outside the key list.
 
-         #### 5. Answer Format:
-          - key: a list of integers 
-          {{
-            "answer": 'Your detailed legal answer in Vietnamese ...).',
-            "key": [list of selected document numbers]
-          }}
+
+         #### 5. Response format:
+          - key: list of integers
+          - Required to return a format that can be loaded with the json.loads function, which is a dictionary
+          
+          "answer": "Your detailed legal response in Vietnamese",
+          "key": [list of selected document numbers]
   classify_query:
     messages:
       - role: system
