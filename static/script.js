@@ -231,12 +231,8 @@ function searchWeb(query) {
 function processResponse(data) {
     const { answer, lst_Relevant_Documents } = data;
     let formattedAnswer = "";
-
-    // Vì `answer` bây giờ là một chuỗi, chỉ cần thay thế ký tự xuống dòng bằng <br> để hiển thị đúng
     formattedAnswer = answer.replace(/\n/g, "<br>");
     formattedAnswer = formattedAnswer.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-    // Tạo một phần tử trống để từng từ sẽ được gõ vào đó
     const $chatOutput = $('#chat-output');
     const $botMessage = $(`
         <div class="chat-message bot">
@@ -245,13 +241,16 @@ function processResponse(data) {
         </div>
     `);
     $chatOutput.append($botMessage);
-
-    // Gọi typeMessage để hiển thị từng từ của câu trả lời
     typeMessage($botMessage.find(".message"), formattedAnswer, () => {
-        // Kiểm tra nếu lst_Relevant_Documents tồn tại và không rỗng
+        // Hiển thị lại trích dẫn dạng collapsible bên dưới khung chat
         if (lst_Relevant_Documents && lst_Relevant_Documents.length > 0) {
             displayRelevantDocuments(lst_Relevant_Documents);
+        } else {
+            $('#relevant-documents-container').empty();
         }
+        // Xóa nút nổi nếu còn sót lại
+        $('#show-references-btn').remove();
+        $('.references-overlay').remove();
     });
 }
 
@@ -282,28 +281,50 @@ function displayRelevantDocuments(documents) {
     const container = $('#relevant-documents-container');
     container.empty(); // Xóa các thẻ cũ nếu có
 
-    // Tạo header collapsible
+    // Giới hạn số lượng trích dẫn tối đa là 5
+    const maxReferences = 5;
+    const displayDocs = documents.slice(0, maxReferences);
+    const count = displayDocs.length;
+    let badgeClass = '';
+    if (count >= 5) badgeClass = 'red';
+    else if (count >= 3) badgeClass = 'orange';
+    else badgeClass = '';
+
+    // Tạo header (dạng button) để mở modal
     const header = $(`
-        <div class="references-collapsible-header">
+        <div class="references-collapsible-header" style="cursor:pointer;">
             <span class="references-collapsible-arrow">▶</span>
             <span>Trích dẫn tham khảo</span>
+            <span class="references-collapsible-badge ${badgeClass}">${count}</span>
         </div>
     `);
     container.append(header);
 
-    // Tạo content collapsible
-    const content = $('<div class="references-collapsible-content"></div>');
-    container.append(content);
+    // Khi click header, hiện modal overlay
+    header.on('click', function() {
+        showReferencesModal(displayDocs);
+    });
+}
 
-    // Tạo một div riêng cho các thẻ tài liệu
-    const documentsWrapper = $('<div class="documents-wrapper"></div>');
-    content.append(documentsWrapper);
-
+// Hàm hiện modal overlay chứa các thẻ trích dẫn
+function showReferencesModal(documents) {
+    // Xóa overlay cũ nếu có
+    $('.references-modal-overlay').remove();
+    const overlay = $(`
+        <div class="references-modal-overlay">
+            <div class="references-modal-popup">
+                <div class="references-modal-title">📑 Trích dẫn tham khảo (${documents.length})</div>
+                <button class="references-modal-close" title="Đóng">×</button>
+                <div class="documents-wrapper"></div>
+            </div>
+        </div>
+    `);
+    // Thêm các thẻ trích dẫn vào popup
+    const documentsWrapper = overlay.find('.documents-wrapper');
     documents.forEach((doc, index) => {
-        // Nếu là link (http/https) thì render ra link với icon link
         if (typeof doc === 'string' && doc.startsWith('http')) {
-            const docElement = $(
-                `<div class="relevant-document">
+            const docElement = $(`
+                <div class="relevant-document">
                     <span class="doc-icon">🔗</span>
                     <div class="doc-title">Link tham khảo</div>
                     <div class="doc-content"><a href="${doc}" target="_blank" rel="noopener noreferrer">${doc}</a></div>
@@ -312,49 +333,40 @@ function displayRelevantDocuments(documents) {
             documentsWrapper.append(docElement);
             return;
         }
-
-        // Nếu là tài liệu có metadata thì giữ nguyên logic cũ
         const parts = doc.split('<=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=>');
         if (parts.length > 1) {
-            const contentPart = parts[1].trim(); // Metadata phần đầu tiên
-            const metadataPart = parts[0].trim();  // Nội dung tài liệu phần thứ hai
-
-            // Trích xuất thông tin từ metadata, ví dụ: 'loai_van_ban' và 'so_hieu'
+            const contentPart = parts[1].trim();
+            const metadataPart = parts[0].trim();
             const loaiVanBanMatch = metadataPart.match(/Loại văn bản: (.*)/);
             const soHieuMatch = metadataPart.match(/Số hiệu: (.*)/);
-
-            // Lấy thông tin từ các nhóm đã trích xuất
             const loaiVanBan = loaiVanBanMatch ? loaiVanBanMatch[1] : "N/A";
             const soHieu = soHieuMatch ? soHieuMatch[1] : "N/A";
-
-            // Giới hạn nội dung hiển thị (ví dụ: 40 ký tự đầu tiên, 2 dòng)
             const shortContent = contentPart.length > 40 ? contentPart.substring(0, 40) + '...' : contentPart;
-
-            // Tạo nội dung thẻ tài liệu mới
-            const docElement = $(
-                `<div class="relevant-document" data-full-content="${doc}">
+            const docElement = $(`
+                <div class="relevant-document" data-full-content="${doc}">
                     <span class="doc-icon">📄</span>
                     <div class="doc-title">${loaiVanBan} ${soHieu}</div>
                     <div class="doc-content">${shortContent}</div>
                 </div>`
             );
-
-            // Thêm sự kiện click để mở rộng nội dung đầy đủ
-            docElement.on('click', function() {
+            docElement.on('click', function(e) {
+                e.stopPropagation();
                 const fullContent = $(this).data('full-content');
                 openFullscreenDocument(fullContent);
             });
-
             documentsWrapper.append(docElement);
         }
     });
-
-    // Sự kiện mở/đóng collapsible
-    header.on('click', function() {
-        const arrow = header.find('.references-collapsible-arrow');
-        content.toggleClass('open');
-        arrow.toggleClass('open');
+    // Sự kiện đóng overlay
+    overlay.find('.references-modal-close').on('click', function() {
+        overlay.remove();
     });
+    overlay.on('click', function(e) {
+        if ($(e.target).is('.references-modal-overlay')) {
+            overlay.remove();
+        }
+    });
+    $('body').append(overlay);
 }
 
 // Hàm mở nội dung đầy đủ khi click vào Trích dẫn
@@ -731,4 +743,89 @@ function deleteChatSession(sessionId) {
             console.error("Error deleting session.");
         }
     });
+}
+
+// Hàm tạo/hiện nút nổi xem trích dẫn
+function showReferencesButton(documents) {
+    // Xóa nút cũ nếu có
+    $('#show-references-btn').remove();
+    if (!documents || documents.length === 0) return;
+    // Tạo nút nổi
+    const btn = $(`
+        <button id="show-references-btn" class="highlight" title="Xem trích dẫn tham khảo">
+            📑 Trích dẫn
+            <span class="badge">${documents.length}</span>
+        </button>
+    `);
+    $('body').append(btn);
+    // Hiệu ứng nổi bật trong 2s đầu
+    setTimeout(() => btn.removeClass('highlight'), 2000);
+    // Sự kiện click để mở overlay
+    btn.on('click', function() {
+        showReferencesOverlay(documents);
+    });
+}
+
+// Hàm hiện overlay pop-up chứa các thẻ trích dẫn
+function showReferencesOverlay(documents) {
+    // Xóa overlay cũ nếu có
+    $('.references-overlay').remove();
+    // Tạo overlay
+    const overlay = $(`
+        <div class="references-overlay">
+            <div class="references-popup">
+                <div class="references-popup-title">📑 Trích dẫn tham khảo (${documents.length})</div>
+                <button class="references-popup-close" title="Đóng">×</button>
+                <div class="documents-wrapper"></div>
+            </div>
+        </div>
+    `);
+    // Thêm các thẻ trích dẫn vào popup
+    const documentsWrapper = overlay.find('.documents-wrapper');
+    documents.forEach((doc, index) => {
+        if (typeof doc === 'string' && doc.startsWith('http')) {
+            const docElement = $(`
+                <div class="relevant-document">
+                    <span class="doc-icon">🔗</span>
+                    <div class="doc-title">Link tham khảo</div>
+                    <div class="doc-content"><a href="${doc}" target="_blank" rel="noopener noreferrer">${doc}</a></div>
+                </div>`
+            );
+            documentsWrapper.append(docElement);
+            return;
+        }
+        const parts = doc.split('<=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=>');
+        if (parts.length > 1) {
+            const contentPart = parts[1].trim();
+            const metadataPart = parts[0].trim();
+            const loaiVanBanMatch = metadataPart.match(/Loại văn bản: (.*)/);
+            const soHieuMatch = metadataPart.match(/Số hiệu: (.*)/);
+            const loaiVanBan = loaiVanBanMatch ? loaiVanBanMatch[1] : "N/A";
+            const soHieu = soHieuMatch ? soHieuMatch[1] : "N/A";
+            const shortContent = contentPart.length > 40 ? contentPart.substring(0, 40) + '...' : contentPart;
+            const docElement = $(`
+                <div class="relevant-document" data-full-content="${doc}">
+                    <span class="doc-icon">📄</span>
+                    <div class="doc-title">${loaiVanBan} ${soHieu}</div>
+                    <div class="doc-content">${shortContent}</div>
+                </div>`
+            );
+            docElement.on('click', function(e) {
+                e.stopPropagation();
+                const fullContent = $(this).data('full-content');
+                openFullscreenDocument(fullContent);
+            });
+            documentsWrapper.append(docElement);
+        }
+    });
+    // Sự kiện đóng overlay
+    overlay.find('.references-popup-close').on('click', function() {
+        overlay.remove();
+    });
+    overlay.on('click', function(e) {
+        if ($(e.target).is('.references-overlay')) {
+            overlay.remove();
+        }
+    });
+    $('body').append(overlay);
 }

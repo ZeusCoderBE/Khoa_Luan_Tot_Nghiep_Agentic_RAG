@@ -442,7 +442,7 @@ button:disabled {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: 1400; /* Đảm bảo cao hơn modal trích dẫn */
 }
 
 /* Định dạng nội dung tài liệu khi mở rộng */
@@ -704,7 +704,7 @@ button:disabled {
 .references-collapsible-header {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     font-size: 16px;
     font-weight: bold;
     color: #333;
@@ -713,16 +713,49 @@ button:disabled {
     cursor: pointer;
     user-select: none;
     transition: color 0.2s;
+    justify-content: flex-start;
+    padding: 8px 18px 8px 12px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1.5px solid #e0e0e0;
+    box-shadow: 0 2px 8px rgba(25,195,125,0.04);
+    width: fit-content;
 }
 .references-collapsible-header:hover {
     color: #19c37d;
+    border-color: #19c37d;
 }
 .references-collapsible-arrow {
-    font-size: 18px;
+    font-size: 20px;
     transition: transform 0.2s;
+    display: flex;
+    align-items: center;
 }
-.references-collapsible-arrow.open {
-    transform: rotate(90deg);
+.references-collapsible-badge {
+    display: inline-block;
+    min-width: 26px;
+    height: 26px;
+    line-height: 26px;
+    border-radius: 50%;
+    font-size: 15px;
+    font-weight: bold;
+    text-align: center;
+    margin-left: 8px;
+    box-shadow: 0 1px 4px #19c37d22;
+    background: #eafaf3;
+    color: #19c37d;
+    border: 2px solid #19c37d;
+    vertical-align: middle;
+}
+.references-collapsible-badge.orange {
+    background: #fff4e5;
+    color: #ff9800;
+    border-color: #ff9800;
+}
+.references-collapsible-badge.red {
+    background: #ffeaea;
+    color: #e53935;
+    border-color: #e53935;
 }
 .references-collapsible-content {
     display: none;
@@ -734,4 +767,146 @@ button:disabled {
 @keyframes slideDown {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* Nút nổi xem trích dẫn */
+#show-references-btn {
+    position: fixed;
+    right: 40px;
+    bottom: 32px;
+    z-index: 1200;
+    background: #19c37d;
+    color: #fff;
+    border: none;
+    border-radius: 24px;
+    padding: 12px 22px 12px 18px;
+    font-size: 16px;
+    font-weight: bold;
+    box-shadow: 0 4px 16px rgba(25,195,125,0.18);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+    outline: none;
+}
+#show-references-btn.highlight {
+    background: #13a06f;
+    animation: pulse 1s 2;
+}
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 #19c37d55; }
+    70% { box-shadow: 0 0 0 10px #19c37d11; }
+    100% { box-shadow: 0 0 0 0 #19c37d00; }
+}
+#show-references-btn .badge {
+    background: #fff;
+    color: #19c37d;
+    border-radius: 50%;
+    font-size: 13px;
+    font-weight: bold;
+    padding: 2px 7px;
+    margin-left: 4px;
+    box-shadow: 0 1px 4px #19c37d33;
+}
+/* Overlay pop-up */
+.references-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 1300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.references-popup {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(25,195,125,0.18);
+    padding: 32px 32px 24px 32px;
+    min-width: 340px;
+    max-width: 90vw;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+}
+.references-popup-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #19c37d;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.references-popup-close {
+    position: absolute;
+    top: 16px;
+    right: 18px;
+    font-size: 22px;
+    color: #888;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.references-popup-close:hover {
+    color: #d00;
+}
+.references-popup .documents-wrapper {
+    flex-wrap: wrap;
+    gap: 18px;
+    justify-content: flex-start;
+}
+
+.references-modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 1300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.references-modal-popup {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 8px 32px rgba(25,195,125,0.18);
+    padding: 32px 32px 24px 32px;
+    min-width: 340px;
+    max-width: 90vw;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+.references-modal-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #19c37d;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.references-modal-close {
+    position: absolute;
+    top: 16px;
+    right: 18px;
+    font-size: 22px;
+    color: #888;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.references-modal-close:hover {
+    color: #d00;
+}
+.references-modal-popup .documents-wrapper {
+    flex-wrap: wrap;
+    gap: 18px;
+    justify-content: flex-start;
 }
