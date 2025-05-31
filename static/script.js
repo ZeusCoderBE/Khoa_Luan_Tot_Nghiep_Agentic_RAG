@@ -738,6 +738,15 @@ function deleteChatSession(sessionId) {
             console.log('Session deleted successfully');
             // Cập nhật lại danh sách các phiên chat trong sidebar
             loadChatSessions();
+            // Nếu đang ở phiên chat bị xóa thì clear chat và disable input
+            if (currentSessionId === sessionId) {
+                $('#chat-output').empty();
+                $('#relevant-documents-container').empty();
+                const $inputArea = $('#user-query');
+                $inputArea.prop('disabled', true);
+                $inputArea.attr('placeholder', 'Click "Đoạn Chat Mới" để bắt đầu một phiên trò chuyện mới!');
+                $('#send-button').prop('disabled', true).removeClass('active').addClass('disabled');
+            }
         },
         error: function() {
             console.error("Error deleting session.");
