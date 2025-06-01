@@ -4,11 +4,6 @@ from source.core.config import Settings
 import requests
 from bs4 import BeautifulSoup
 from typing import List
-from selenium.webdriver.chrome.options import Options
-import requests
-from bs4 import BeautifulSoup
-from typing import List
-from selenium import webdriver
 class GoogleSearchTool:
     def __init__(self,setting:Settings):
         self.api_key = setting.GOOGLE_SEARCH_API
@@ -30,28 +25,24 @@ class GoogleSearchTool:
         for item in results.get("items", []):
             links.append(item["link"])
         return links
-    def extract_text_from_url(self, link: str) -> str:
-        content = ""
-        edge_options = Options()
-        edge_options.add_argument("--headless")
-        edge_options.add_argument(
-            "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
-        )
-
-        driver = webdriver.Edge(options=edge_options)
+    def extract_text_from_url(self, url: str) -> str:
         try:
-            # Ưu tiên dùng Selenium để đảm bảo lấy được nội dung động
-            driver.get(link)
-            html = driver.page_source
-            soup = BeautifulSoup(html, "html.parser")
-            content = soup.get_text(separator="\n", strip=True)
+            response = requests.get(url, timeout=10, verify=False)  # Tắt SSL verify
+            if response.status_code != 200:
+                return f"[Failed to fetch: {url}]"
+            soup = BeautifulSoup(response.text, 'html.parser')
+            for script_or_style in soup(["script", "style"]):
+                script_or_style.extract()
+            text = soup.get_text(separator=' ', strip=True)
+            return text
+        except requests.exceptions.SSLError as ssl_err:
+            return f"[SSL Error fetching {url}]: {str(ssl_err)}"
         except Exception as e:
-            print(f"Lỗi khi truy cập link {link}: {e}")
-        finally:
-            driver.quit()
-
-        return content or "[Empty Content]"
+            return f"[Error fetching {url}]: {str(e)}"
 
     def extract_texts_from_links(self, links: List[str]) -> List[str]:
-        return [self.extract_text_from_url(url) for url in links]
-
+        texts = []
+        for url in links:
+            text = self.extract_text_from_url(url)
+            texts.append(text)
+        return texts     

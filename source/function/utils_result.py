@@ -33,6 +33,20 @@ class RAG():
         answer_result= clean_code_fence_safe(result_gemini)
         answer_result= parse_raw_json(answer_result)
         return answer_result['answer']
+    def get_gemini_response_rag_final_extract(self,user_query):
+        article_documents = self.qdrant_utils.search_With_Similarity_Queries(user_query)
+        rrf_result_docs=self.rerank_utils.reciprocal_rank_fusion(article_documents)
+        # print(f"Số document khi xoá trùng {len(rrf_result_docs)}")
+        rerank_article_documents = self.rerank_utils.rerank_documents_finetune(user_query,rrf_result_docs) # .rerank_documents_finetune nếu dùng model 5tune
+        # print(f"Số document sau khi qua rerank: {len(rerank_article_documents)}")
+        article_Content_Resuls=[]
+        for doc, _ in rerank_article_documents:
+                    article_Content_Resuls.append(doc.replace("_"," "))
+        document_reduce=self.extract_utils.predict(article_Content_Resuls,user_query)
+        result_gemini=self.generate.generate_response(user_query,document_reduce)
+        answer_result= clean_code_fence_safe(result_gemini)
+        answer_result= parse_raw_json(answer_result)
+        return answer_result['answer']
     def get_Article_Content_Results(self,user_Query):
         check=self.generate.classify_query(user_Query)
         if  check==0:
@@ -81,7 +95,7 @@ class RAG():
                             for i, ((doc, infor), key) in enumerate(zip(selected_documents,selected_keys))
                         ]
                 else  :
-                     lst_Article_Quote=""
+                     lst_Article_Quote=[]
                 return answer_result, lst_Article_Quote
             except Exception as e :
                 print(e)

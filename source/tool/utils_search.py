@@ -1,8 +1,5 @@
-import sys
-project_path = r"D:/DaiHoc/machinelearning/TLCN/DoAnTotNghiep_chat_bot/"
-sys.path.append(project_path)
 import json 
-from source.function.utils_shared import clean_code_fence_safe,fix_json_string
+from source.function.utils_shared import clean_code_fence_safe,parse_raw_json
 from source.extract.utils_extract import Extract_Information
 from source.core.config import Settings
 from source.generate.generate import Gemini_Generate
@@ -23,8 +20,7 @@ class Utils_Search_Tools:
             lst_reduce_docs=self.extract_func.predict(lst_docs,query)
             result_final=self.gemini_func.generate_response(query,lst_reduce_docs)
             answer_result=clean_code_fence_safe(result_final)
-            answer_result=fix_json_string(answer_result)
-            answer_result = json.loads(answer_result)
+            answer_result=parse_raw_json(answer_result)
             relevant_links = [lst_links[i] for i in answer_result['key']]
             return answer_result['answer'], relevant_links
         except Exception as e :

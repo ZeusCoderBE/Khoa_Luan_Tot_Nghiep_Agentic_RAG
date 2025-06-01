@@ -35,10 +35,10 @@ class Gemini_Generate():
 
         return queries    
     def generate_response(self,query: str,docs) -> str:
-        docs = [doc for doc, _ in docs]
-        docs_dict = {i: doc for i, doc in enumerate(docs)}
-        docs_str = "\n".join(f"{k}: {v}" for k, v in docs_dict.items())
-        # docs = "\n".join(f"{k}: {v}" for k, v in docs.items())
+        # docs = [doc for doc, _ in docs]
+        # docs_dict = {i: doc for i, doc in enumerate(docs)}
+        # docs_str = "\n".join(f"{k}: {v}" for k, v in docs_dict.items())
+        docs = "\n".join(f"{k}: {v}" for k, v in docs.items())
         prompt_template=load_prompt_from_yaml(self.yaml_path,"response")
         response_model = ChatGoogleGenerativeAI(
             google_api_key=self.gemini_model.key_manager.get_next_key(),
@@ -47,7 +47,7 @@ class Gemini_Generate():
             max_tokens=10000,
             top_p=0.6,
         )
-        prompt_template=prompt_template.format_messages(original_query=query,context=docs_str)
+        prompt_template=prompt_template.format_messages(original_query=query,context=docs)
         response_chain =response_model | StrOutputParser()
         final_response = response_chain.invoke(prompt_template).strip()
         return final_response

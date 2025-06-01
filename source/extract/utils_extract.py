@@ -55,5 +55,4 @@ class Extract_Information():
         except Exception as e:
             print(f"Lỗi xảy ra: {e}")
             return "Không có câu trả lời do lỗi xử lý"
-        print(lst_Answer_Final)
         return lst_Answer_Final
