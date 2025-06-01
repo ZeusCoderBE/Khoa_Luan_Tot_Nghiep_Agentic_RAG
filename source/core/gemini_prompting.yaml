@@ -100,11 +100,20 @@ prompts:
 
 
          #### 5. Response format:
-          - key: list of integers
-          - Required to return a format that can be loaded with the json.loads function, which is a dictionary
-          
-          "answer": "Your detailed legal response in Vietnamese",
-          "key": [list of selected document numbers]
+         - The response must be a Python dictionary, not a string.
+         - Each key must be an integer.
+         - The dictionary must be directly loadable using json.loads() without errors.
+         - It must not contain any invalid characters (e.g., unescaped quotes, control characters, trailing commas) that could cause json.loads() to fail.
+         - All string values must be properly escaped and conform to JSON syntax rules.
+         ##### 5.1 Example:
+          Input: "Bao nhiêu tuổi thì được phép đăng kí kết hôn ?"
+          Output: 
+          "
+           {{
+              "answer": "Your detailed legal response in Vietnamese",
+              "key": [list of selected document numbers]
+           }}
+          "
   classify_query:
     messages:
       - role: system

@@ -3,8 +3,7 @@ from source.search.utils_search import Qdrant_Utils
 from source.extract.utils_extract import Extract_Information
 from source.generate.generate import Gemini_Generate
 from source.core.config import Settings
-from source.function.utils_shared import load_information_from_json,search_from_json,clean_code_fence_safe,fix_json_string,parse_raw_json
-import json
+from source.function.utils_shared import load_information_from_json,search_from_json,clean_code_fence_safe,parse_raw_json
 from source.model.embedding_model import Sentences_Transformer_Embedding
 class RAG():
     def __init__(self,gemini_utils:Gemini_Generate,bert_utils: Extract_Information,qdrant_utils:Qdrant_Utils,rerank_utils:Rerank_Utils,setting:Settings,model_embedding:Sentences_Transformer_Embedding):
@@ -21,7 +20,6 @@ class RAG():
         document=self.qdrant_utils.search_documents(user_query)
         result=self.generate.generate_response(user_query,document)
         answer_result= clean_code_fence_safe(result)
-        answer_result= fix_json_string(answer_result)
         answer_result= parse_raw_json(answer_result)
         answer_result = answer_result['answer']
         return answer_result
@@ -29,11 +27,10 @@ class RAG():
         article_documents = self.qdrant_utils.search_With_Similarity_Queries(user_query)
         rrf_result_docs=self.rerank_utils.reciprocal_rank_fusion(article_documents)
         # print(f"Số document khi xoá trùng {len(rrf_result_docs)}")
-        rerank_article_documents = self.rerank_utils.rerank_documents_finetune(user_query,rrf_result_docs) # .rerank_documents_finetune nếu dùng model 5tune
+        rerank_article_documents = self.rerank_utils.rerank_documents(user_query,rrf_result_docs) # .rerank_documents_finetune nếu dùng model 5tune
         # print(f"Số document sau khi qua rerank: {len(rerank_article_documents)}")
         result_gemini=self.generate.generate_response(user_query,rerank_article_documents)
         answer_result= clean_code_fence_safe(result_gemini)
-        answer_result= fix_json_string(answer_result)
         answer_result= parse_raw_json(answer_result)
         return answer_result['answer']
     def get_Article_Content_Results(self,user_Query):
@@ -59,7 +56,6 @@ class RAG():
                 document_reduce=self.extract_utils.predict(article_Content_Resuls,user_Query)
                 result_gemini=self.generate.generate_response(user_Query,document_reduce)
                 answer_result= clean_code_fence_safe(result_gemini)
-                answer_result= fix_json_string(answer_result)
                 answer_result= parse_raw_json(answer_result)
                 selected_keys = answer_result["key"]
                 answer_result = answer_result['answer']

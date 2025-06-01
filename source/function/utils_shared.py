@@ -65,53 +65,73 @@ def clean_code_fence_safe(text: str) -> str:
         lines = lines[:-1]
     return "\n".join(lines).strip()
 
-def fix_json_string(s):
-    # Bước 1: Thay xuống dòng thật trong chuỗi thành \n chỉ trong giá trị của key "answer"
-    # Dùng regex để lấy phần trong dấu ""
-    match = re.search(r'"answer"\s*:\s*"(.+?)"\s*,', s, flags=re.DOTALL)
-    if not match:
-        return s  # Không tìm thấy "answer", trả về nguyên bản
-
-    answer_str = match.group(1)
-    # Thay xuống dòng thật thành \n
-    answer_fixed = answer_str.replace('\n', '\\n')
-
-    # Thay lại trong chuỗi gốc
-    s_fixed = s.replace(answer_str, answer_fixed)
-    return s_fixed
-
 def parse_raw_json(raw_text: str) -> dict:
     text = raw_text.replace('“', '"').replace('”', '"')
-    pattern = r'("answer"\s*:\s*")(.+?)("(?=\s*,\s*"key"))'
+    
+    # Sửa pattern regex, bắt thoáng hơn phần nội dung "answer"
+    pattern = r'("answer"\s*:\s*")(.+?)"(?=\s*,\s*"key"|})'
     
     match = re.search(pattern, text, flags=re.DOTALL)
     if not match:
         print("DEBUG - raw_text:\n", raw_text)
         raise ValueError("Không tìm thấy trường 'answer' hoặc định dạng quá lệch không parse được.")
-    
-    prefix = match.group(1)
-    answer_content = match.group(2)
-    suffix = match.group(3)
 
-    # Escape backslash, quotes và các ký tự xuống dòng trong answer_content
-    escaped_content = (
-        answer_content
-        .replace('\\', '\\\\')
-        .replace('"', '\\"')
-        .replace('\n', '\\n')
-        .replace('\r', '\\r')
-        .replace('\t', '\\t')
-    )
+    prefix = match.group(1)        
+    raw_content = match.group(2)   
+    end_pos = match.end()          
+
+    escaped_content = json.dumps(raw_content)[1:-1]
 
     fixed_text = (
         text[: match.start(1)] +
         prefix +
         escaped_content +
-        suffix +
-        text[match.end(3):]
+        '"' +
+        text[end_pos:]
     )
 
     fixed_text = textwrap.dedent(fixed_text).strip()
+
     return json.loads(fixed_text)
+
+# def parse_raw_json(raw_text: str) -> dict:
+#     # 1. Chuẩn hóa ngoặc kép Unicode
+#     text = raw_text.replace('“', '"').replace('”', '"')
+    
+#     # 2. Pattern để bắt "answer": "<nội dung>" (hỗ trợ \\" hay \\n sẵn)
+#     pattern = r'("answer"\s*:\s*")((?:[^"\\]|\\.)*?)"(?=\s*,\s*"key")'
+#     match = re.search(pattern, text, flags=re.DOTALL)
+#     if not match:
+#         print("DEBUG - raw_text:\n", raw_text)
+#         raise ValueError("Không tìm thấy trường 'answer' hoặc định dạng quá lệch không parse được.")
+
+#     prefix = match.group(1)        # ví dụ: '"answer": "'
+#     raw_content = match.group(2)   # nội dung hiện tại (chưa được escape đúng)
+#     end_pos = match.end()          # vị trí ngay sau dấu " đóng của answer
+
+#     # 3. Dùng json.dumps để escape đúng chuỗi
+#     #    json.dumps trả về dạng "\"nội dung đã escape\"", nên ta cắt bỏ 2 ký tự " ở đầu-cuối
+#     escaped_content = json.dumps(raw_content)[1:-1]
+
+#     # 4. Ghép lại toàn bộ JSON: 
+#     #    - Phần trước prefix
+#     #    - prefix
+#     #    - escaped_content
+#     #    - dấu " đóng
+#     #    - phần còn lại của text từ end_pos
+#     fixed_text = (
+#         text[: match.start(1)] +
+#         prefix +
+#         escaped_content +
+#         '"' +
+#         text[end_pos:]
+#     )
+
+#     # 5. Loại bỏ indent không cần thiết và strip
+#     fixed_text = textwrap.dedent(fixed_text).strip()
+
+#     # 6. Chuyển thành dict
+#     return json.loads(fixed_text)
+
 
 
