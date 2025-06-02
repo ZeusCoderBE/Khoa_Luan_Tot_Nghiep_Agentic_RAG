@@ -173,7 +173,7 @@ prompts:
           - "Biết mình đủ tuổi kết hôn và đáp ứng các điều kiện kết hôn,Anh S và chị Y dự định đi đăng ký kết hôn trước khi tổ chức lễ cưới trước 02 tháng. Chị Y và anh S có hộ khẩu thường trú ở hai tỉnh khác nhau, anh chịmuốn biết việc đăng ký kết hôn thực hiện tại cơ quan nào và cần thực hiện thủ tục gì?"
           Then return **1**
           
-          #### CASE 2: If the question is unclear, contains obscene or meaningless content, or is not related to a legal vietnamese question, a greeting, or chatbot information.
+          #### CASE 3: If the question is unclear, contains obscene or meaningless content, or is not related to a legal vietnamese question, a greeting, or chatbot information.
           ##### EXAMPLES:
           ###### EXAMPLE 1:
           - "Bạn có thể trả lời cho tui quảng đường tới đại học sư phạm kỹ thuật không?"

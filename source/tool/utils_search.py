@@ -25,4 +25,4 @@ class Utils_Search_Tools:
             return answer_result['answer'], relevant_links
         except Exception as e :
             print("Đang bị lỗi"+e)
-            return "", []
+            return "", lst_links

@@ -231,7 +231,12 @@ function searchWeb(query) {
 function processResponse(data) {
     const { answer, lst_Relevant_Documents } = data;
     let formattedAnswer = "";
-    formattedAnswer = answer.replace(/\n/g, "<br>");
+    // Thay thế tất cả các trường hợp xuống dòng: ký tự thực, '\n', '\n\n'
+    formattedAnswer = answer
+        .replace(/\\n\\n/g, "<br><br>")   // chuỗi '\n\n' (2 dấu backslash)
+        .replace(/\\n/g, "<br>")           // chuỗi '\n' (1 dấu backslash)
+        .replace(/\n\n/g, "<br><br>")      // ký tự xuống dòng kép thực sự
+        .replace(/\n/g, "<br>");            // ký tự xuống dòng đơn thực sự
     formattedAnswer = formattedAnswer.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     const $chatOutput = $('#chat-output');
     const $botMessage = $(`
@@ -256,24 +261,44 @@ function processResponse(data) {
 
 // Hàm cho chatbot in ra phản hồi cho user
 function typeMessage($element, message, callback) {
-    const words = message.split(" ");
-    let index = 0;
+    // Tách message thành từng từ, nhưng vẫn giữ <br> là một phần riêng biệt
+    const parts = message.split(/(<br>)/g);
+    let words = [];
+    parts.forEach(part => {
+        if (part === "<br>") {
+            words.push("<br>");
+        } else {
+            // Tách từng từ, giữ nguyên HTML
+            const splitWords = part.split(" ");
+            splitWords.forEach((w, i) => {
+                // Đảm bảo không thêm từ rỗng cuối cùng do split
+                if (w !== "" || i < splitWords.length - 1) words.push(w);
+            });
+        }
+    });
 
-    isTyping = true; // Bắt đầu trạng thái gõ
-    updateSendButtonState(); // Vô hiệu hóa nút Send khi chatbot đang gõ
+    let wordIndex = 0;
+    isTyping = true;
+    updateSendButtonState();
 
     const interval = setInterval(() => {
-        if (index < words.length) {
-            $element.append(words[index] + " ");
-            index++;
+        if (wordIndex < words.length) {
+            if (words[wordIndex] === "<br>") {
+                $element.append("<br>");
+            } else {
+                // Nếu từ tiếp theo là <br> hoặc là từ cuối, không thêm dấu cách
+                const addSpace = (wordIndex < words.length - 1 && words[wordIndex + 1] !== "<br>");
+                $element.append(words[wordIndex] + (addSpace ? " " : ""));
+            }
+            wordIndex++;
             $element.parent().scrollTop($element.parent().prop('scrollHeight'));
         } else {
             clearInterval(interval);
-            isTyping = false; // Kết thúc trạng thái gõ
-            updateSendButtonState(); // Cập nhật trạng thái nút Send sau khi hoàn thành
-            if (callback) callback(); // Gọi callback sau khi in xong
+            isTyping = false;
+            updateSendButtonState();
+            if (callback) callback();
         }
-    }, 25); // Điều chỉnh tốc độ gõ chữ (25ms mỗi từ)
+    }, 25);
 }
 
 // Hàm tạo thẻ cho lst_Relevant_Documents
@@ -643,8 +668,12 @@ function loadChatHistory(sessionId) {
             chatHistory.forEach(chat => {
                 const isBot = chat.sender === 'bot';
                 
-                let formattedMessage = chat.message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-                formattedMessage = formattedMessage.replace(/\n/g, "<br>");
+                let formattedMessage = chat.message
+                    .replace(/\\n\\n/g, "<br><br>")
+                    .replace(/\\n/g, "<br>")
+                    .replace(/\n\n/g, "<br><br>")
+                    .replace(/\n/g, "<br>")
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
                 const messageHtml = `
                     <div class="chat-message ${isBot ? 'bot' : 'user'}" data-message-id="${chat.id}">
