@@ -158,12 +158,12 @@ function sendMessage() {
             clearInterval(updateTimeInterval);
             $typingIndicator.remove();
 
-            // Kiểm tra nếu câu trả lời là thông báo không biết
-            if (data.answer.includes("Xin lỗi bạn. Kiến thức này nằm ngoài phạm vi hiểu biết của tôi. Bạn có thể hỏi tôi một câu hỏi khác không? Tôi sẽ cố gắng giải đáp câu hỏi của bạn!")) {
+            // Kiểm tra nếu không có tài liệu tham khảo
+            if (!data.lst_Relevant_Documents || data.lst_Relevant_Documents.length === 0) {
                 // Chuyển sang tìm kiếm web ngay lập tức
                 searchWeb(query);
             } else {
-                // Nếu câu trả lời bình thường, xử lý như cũ
+                // Nếu có tài liệu tham khảo, xử lý như cũ
                 processResponse(data);
                 saveMessage(currentSessionId, 'bot', data.answer, data.lst_Relevant_Documents);
                 $chatOutput.scrollTop($chatOutput.prop('scrollHeight'));

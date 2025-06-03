@@ -22,7 +22,14 @@ class Utils_Search_Tools:
             answer_result=clean_code_fence_safe(result_final)
             answer_result=parse_raw_json(answer_result)
             relevant_links = [lst_links[i] for i in answer_result['key']]
+            
+            # Kiểm tra nếu không có relevant links
+            if not relevant_links or len(relevant_links) == 0:
+                error_message = "Xin lỗi, tôi không thể đưa ra kết quả cuối cùng được. Tuy nhiên, bạn có thể tham khảo thông qua danh sách các tài liệu mà tôi đã tìm kiếm."
+                return error_message, lst_links
+            
             return answer_result['answer'], relevant_links
-        except Exception as e :
+        except Exception as e:
             print("Đang bị lỗi"+e)
-            return "", lst_links
+            error_message = "Xin lỗi, tôi không thể đưa ra kết quả cuối cùng được. Tuy nhiên, bạn có thể tham khảo thông qua danh sách các tài liệu mà tôi đã tìm kiếm."
+            return error_message, lst_links

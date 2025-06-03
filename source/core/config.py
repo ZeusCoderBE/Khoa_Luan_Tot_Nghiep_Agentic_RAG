@@ -19,7 +19,7 @@ class Settings():
         self.STRIDE = 150
         self.N_BEST = 380
         self.MAX_ANSWER_LENGTH = 2000
-        self.DEVICE={"device": "cpu"}
+        self.DEVICE={"device": "cuda"}
         self.YAML_PATH=os.getenv("PATH_PROMPT")
         self.PATH_INFOR=os.getenv("PATH_INFOR")
         self.GOOGLE_SEARCH_API=os.getenv("GOOGLE_SEARCH_API")
