@@ -34,7 +34,7 @@ class Gemini_Generate():
         queries = [original_query] + generated_queries
 
         return queries    
-    def generate_response(self,query: str,docs) -> str:
+    def generate_response(self,query: str,docs:dict) -> str:
         # docs = [doc for doc, _ in docs]
         # docs_dict = {i: doc for i, doc in enumerate(docs)}
         # docs_str = "\n".join(f"{k}: {v}" for k, v in docs_dict.items())
