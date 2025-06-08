@@ -37,7 +37,7 @@ class RAG():
         article_documents = self.qdrant_utils.search_With_Similarity_Queries(user_query)
         rrf_result_docs=self.rerank_utils.reciprocal_rank_fusion(article_documents)
         # print(f"Số document khi xoá trùng {len(rrf_result_docs)}")
-        rerank_article_documents = self.rerank_utils.rerank_documents_finetune(user_query,rrf_result_docs) # .rerank_documents_finetune nếu dùng model 5tune
+        rerank_article_documents = self.rerank_utils.rerank_documents(user_query,rrf_result_docs) # .rerank_documents_finetune nếu dùng model 5tune
         # print(f"Số document sau khi qua rerank: {len(rerank_article_documents)}")
         article_Content_Resuls=[]
         for doc, _ in rerank_article_documents:
