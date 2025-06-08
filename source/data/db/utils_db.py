@@ -22,14 +22,53 @@ class DB_Utils():
         cursor.execute(
             """
             INSERT INTO Chat_Messages (session_id, sender, message, send_at)
+            OUTPUT INSERTED.id
             VALUES (?, ?, ?, GETDATE())
             """,
             (session_id, sender, message)
         )
-
+        
+        message_id = cursor.fetchone()[0]
         conn.commit()  
-        conn.close()  
+        conn.close()
+        return message_id
 
+    def Insert_References(self, message_id, references):
+        if not references:
+            return
+            
+        conn = self.db.Get_DB_Connection()
+        cursor = conn.cursor()
+        
+        for ref in references:
+            cursor.execute(
+                """
+                INSERT INTO Chat_References (message_id, reference_content)
+                VALUES (?, ?)
+                """,
+                (message_id, ref)
+            )
+        
+        conn.commit()
+        conn.close()
+
+    def Get_References(self, message_id):
+        conn = self.db.Get_DB_Connection()
+        cursor = conn.cursor()
+        
+        cursor.execute(
+            """
+            SELECT reference_content 
+            FROM Chat_References 
+            WHERE message_id = ?
+            """,
+            (message_id,)
+        )
+        
+        references = [row[0] for row in cursor.fetchall()]
+        conn.close()
+        return references
+    
     def Get_Session(self):
         conn = self.db.Get_DB_Connection()
         cursor = conn.cursor()
@@ -60,7 +99,7 @@ class DB_Utils():
         cursor = conn.cursor()
         
         query = """
-        SELECT sender, message, send_at 
+        SELECT id, sender, message, send_at 
         FROM Chat_Messages 
         WHERE session_id = ? 
         ORDER BY send_at ASC
@@ -76,7 +115,7 @@ class DB_Utils():
         conn = self.db.Get_DB_Connection()
         cursor = conn.cursor()
 
-        cursor.execute("DELETE FROM Chat_Messages WHERE session_id = ?", (session_id,))
+        # cursor.execute("DELETE FROM Chat_Messages WHERE session_id = ?", (session_id,))
         cursor.execute("DELETE FROM Chat_Sessions WHERE id = ?", (session_id,))
         
         conn.commit()  

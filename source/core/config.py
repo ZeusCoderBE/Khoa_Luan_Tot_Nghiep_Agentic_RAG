@@ -19,7 +19,13 @@ class Settings():
         self.STRIDE = 150
         self.N_BEST = 380
         self.MAX_ANSWER_LENGTH = 2000
-        self.DEVICE={"device": "cpu"}
+        self.DEVICE={"device": "cuda"}
         self.YAML_PATH=os.getenv("PATH_PROMPT")
         self.PATH_INFOR=os.getenv("PATH_INFOR")
-        
+        self.GOOGLE_SEARCH_API=os.getenv("GOOGLE_SEARCH_API")
+        self.TOOL_SEARCH=os.getenv("TOOL_SEARCH_API")
+        # Thêm các biến kết nối DB
+        self.DB_HOST = os.getenv("DB_HOST")
+        self.DB_NAME = os.getenv("DB_NAME")
+        self.DRIVER=os.getenv("DRIVER")
+        self.RERANK=os.getenv("MODEL_RERANK")

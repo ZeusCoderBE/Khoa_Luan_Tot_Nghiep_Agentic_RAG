@@ -1,28 +1,35 @@
 // Hàm thao tác với sidebar
 function toggleSidebar() {
     const $sidebar = $('.sidebar');
-    const $sidebarContent = $('.sidebar-content');
     const $toggleButton = $('.toggle-button');
-    const $header = $('.header');
-
-    if ($sidebar.width() === 300) {
-        // Thu nhỏ sidebar
-        $sidebar.css('width', '0');
-        $sidebarContent.hide();
-        $toggleButton.attr('title', 'Open sidebar');
-
-        // Di chuyển toggle-button vào header khi sidebar đóng
-        $header.append($toggleButton);
+    const $newChat = $('#new-chat');
+    if ($sidebar.hasClass('sidebar-collapsed')) {
+        $sidebar.removeClass('sidebar-collapsed');
+        $('.sidebar-content').show();
+        $toggleButton.attr('title', 'Close Sidebar');
+        $newChat.attr('title', 'New Chat');
     } else {
-        // Phóng to sidebar
-        $sidebar.css('width', '300px');
-        $sidebarContent.show();
-        $toggleButton.attr('title', 'Close sidebar');
-
-        // Di chuyển toggle-button vào sidebar khi mở
-        $sidebar.append($toggleButton);
+        $sidebar.addClass('sidebar-collapsed');
+        $('.sidebar-content').hide();
+        $toggleButton.attr('title', 'Open Sidebar');
+        $newChat.removeAttr('title');
     }
 }
+
+// Đặt title đúng trạng thái khi load trang
+$(document).ready(function() {
+    const $sidebar = $('.sidebar');
+    const $toggleButton = $('.toggle-button');
+    const $newChat = $('#new-chat');
+    if ($sidebar.hasClass('sidebar-collapsed')) {
+        $toggleButton.attr('title', 'Open Sidebar');
+        $newChat.removeAttr('title');
+    } else {
+        $toggleButton.attr('title', 'Close Sidebar');
+        $newChat.attr('title', 'New Chat');
+    }
+    updateSearchWebButtonState();
+});
 
 const $userInput = $('#user-query');
 const $sendButton = $('#send-button');
@@ -51,6 +58,33 @@ $('#user-query').on('keydown', function(event) {
     if (event.key === 'Enter') {
         event.preventDefault();
         sendMessage();
+    }
+});
+
+// Thêm biến trạng thái chế độ Search Web
+let isSearchWebMode = false;
+
+// Hàm cập nhật trạng thái nút Search Web
+function updateSearchWebButtonState() {
+    if (currentSessionId) {
+        $('#toggle-search-web').prop('disabled', false).removeClass('disabled');
+    } else {
+        $('#toggle-search-web').prop('disabled', true).addClass('disabled');
+    }
+}
+
+// Xử lý sự kiện click cho nút Search Web
+$('#toggle-search-web').on('click', function() {
+    if ($(this).prop('disabled')) return;
+    console.log('Đã click Search Web!');
+    isSearchWebMode = !isSearchWebMode;
+    $(this).toggleClass('active', isSearchWebMode);
+    if (isSearchWebMode) {
+        $(this).find('span').text('🌐 Search');
+        $('#user-query').attr('placeholder', 'Trả lời dùng Search Tool ...');
+    } else {
+        $(this).find('span').text('Chat');
+        $('#user-query').attr('placeholder', 'Nhập tin nhắn ...');
     }
 });
 
@@ -87,7 +121,7 @@ function sendMessage() {
 
     const $typingIndicator = $(`
         <div class="chat-message bot typing-indicator">
-            <div class="avatar bot-avatar" style="background-image: url('https://png.pngtree.com/png-vector/20230225/ourmid/pngtree-smart-chatbot-cartoon-clipart-png-image_6620453.png');"></div>
+            <div class="avatar bot-avatar" style="background-image: url('https://media.istockphoto.com/id/1333838449/vector/chatbot-icon-support-bot-cute-smiling-robot-with-headset-the-symbol-of-an-instant-response.jpg?s=612x612&w=0&k=20&c=sJ_uGp9wJ5SRsFYKPwb-dWQqkskfs7Fz5vCs2w5w950=');"></div>
             <div class="message" style="font-size: 14px;
                                 color: rgba(0, 0, 0, 0.6); 
                                 display: flex;
@@ -107,37 +141,88 @@ function sendMessage() {
 
     // Cập nhật số phút và giây trong "Đang suy nghĩ câu trả lời"
     const updateTimeInterval = setInterval(() => {
-        const elapsedTime = Math.floor((Date.now() - startTime) / 1000); // Tính số giây đã trôi qua
-        const minutes = Math.floor(elapsedTime / 60); // Tính phút
-        const seconds = elapsedTime % 60; // Tính giây còn lại
-
-        // Đảm bảo rằng phút và giây đều có 2 chữ số
+        const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+        const minutes = Math.floor(elapsedTime / 60);
+        const seconds = elapsedTime % 60;
         const formattedTime = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-
-        // Cập nhật hiển thị thời gian
         $typingIndicator.find('.time-count').text(formattedTime);
-    }, 1000); // Cập nhật mỗi giây
+    }, 1000);
 
-
+    // Thử với Gemini trước
     $.ajax({
         url: 'http://127.0.0.1:8000/api/chat/chatbot-with-gemini',
         type: 'POST',
         contentType: 'application/json',
         data: JSON.stringify({ query: query }),
         success: function(data) {
-            setTimeout(() => {
-                clearInterval(updateTimeInterval); // Dừng cập nhật thời gian khi có phản hồi
-                $typingIndicator.remove();
-                processResponse(data); // Sử dụng processResponse để xử lý phản hồi
+            clearInterval(updateTimeInterval);
+            $typingIndicator.remove();
 
-                // Lưu tin nhắn của chatbot vào database
-                saveMessage(currentSessionId, 'bot', data.answer);
-
+            // Kiểm tra nếu không có tài liệu tham khảo
+            if (!data.lst_Relevant_Documents || data.lst_Relevant_Documents.length === 0) {
+                // Chuyển sang tìm kiếm web ngay lập tức
+                searchWeb(query);
+            } else {
+                // Nếu có tài liệu tham khảo, xử lý như cũ
+                processResponse(data);
+                saveMessage(currentSessionId, 'bot', data.answer, data.lst_Relevant_Documents);
                 $chatOutput.scrollTop($chatOutput.prop('scrollHeight'));
                 isLoading = false;
                 updateSendButtonState();
                 $('#loading-indicator').text("");
-            }, 800);
+            }
+        }
+    });
+}
+
+// Thêm hàm mới để xử lý tìm kiếm web
+function searchWeb(query) {
+    const $chatOutput = $('#chat-output');
+    
+    // Hiển thị thông báo kết hợp
+    const $combinedMessage = $(`
+        <div class="chat-message bot">
+            <div class="avatar bot-avatar" style="background-image: url('https://media.istockphoto.com/id/1333838449/vector/chatbot-icon-support-bot-cute-smiling-robot-with-headset-the-symbol-of-an-instant-response.jpg?s=612x612&w=0&k=20&c=sJ_uGp9wJ5SRsFYKPwb-dWQqkskfs7Fz5vCs2w5w950=');"></div>
+            <div class="message">
+                <div class="transition-text" style="margin-bottom: 10px;">Xin lỗi bạn. Kiến thức này nằm ngoài phạm vi hiểu biết của tôi. Tôi sẽ tiến hành tìm kiếm thông qua kết quả bên ngoài</div>
+                <div class="searching-text" style="font-size: 14px; color: rgba(0, 0, 0, 0.6); display: flex; align-items: center;">
+                    Đang tìm kiếm thông tin từ web
+                    <div class="time-count" style="margin-left: 5px; margin-right: 5px;">00:00</div>
+                    <span>.</span><span>.</span><span>.</span>
+                </div>
+            </div>
+        </div>
+    `);
+    $chatOutput.append($combinedMessage);
+    $chatOutput.scrollTop($chatOutput.prop('scrollHeight'));
+
+    // Khởi tạo thời gian bắt đầu
+    const startTime = Date.now();
+
+    // Cập nhật số phút và giây
+    const updateTimeInterval = setInterval(() => {
+        const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+        const minutes = Math.floor(elapsedTime / 60);
+        const seconds = elapsedTime % 60;
+        const formattedTime = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+        $combinedMessage.find('.time-count').text(formattedTime);
+    }, 1000);
+
+    // Gọi API tìm kiếm web
+    $.ajax({
+        url: 'http://127.0.0.1:8000/api/chat/chatbot-with-search-web',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ query: query }),
+        success: function(data) {
+            clearInterval(updateTimeInterval);
+            $combinedMessage.remove();
+            processResponse(data);
+            saveMessage(currentSessionId, 'bot', data.answer, data.lst_Relevant_Documents);
+            $chatOutput.scrollTop($chatOutput.prop('scrollHeight'));
+            isLoading = false;
+            updateSendButtonState();
+            $('#loading-indicator').text("");
         }
     });
 }
@@ -146,48 +231,74 @@ function sendMessage() {
 function processResponse(data) {
     const { answer, lst_Relevant_Documents } = data;
     let formattedAnswer = "";
-
-    // Vì `answer` bây giờ là một chuỗi, chỉ cần thay thế ký tự xuống dòng bằng <br> để hiển thị đúng
-    formattedAnswer = answer.replace(/\n/g, "<br>");
+    // Thay thế tất cả các trường hợp xuống dòng: ký tự thực, '\n', '\n\n'
+    formattedAnswer = answer
+        .replace(/\\n\\n/g, "<br><br>")   // chuỗi '\n\n' (2 dấu backslash)
+        .replace(/\\n/g, "<br>")           // chuỗi '\n' (1 dấu backslash)
+        .replace(/\n\n/g, "<br><br>")      // ký tự xuống dòng kép thực sự
+        .replace(/\n/g, "<br>");            // ký tự xuống dòng đơn thực sự
     formattedAnswer = formattedAnswer.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-    // Tạo một phần tử trống để từng từ sẽ được gõ vào đó
     const $chatOutput = $('#chat-output');
     const $botMessage = $(`
         <div class="chat-message bot">
-            <div class="avatar bot-avatar" style="background-image: url('https://png.pngtree.com/png-vector/20230225/ourmid/pngtree-smart-chatbot-cartoon-clipart-png-image_6620453.png');"></div>
+            <div class="avatar bot-avatar" style="background-image: url('https://media.istockphoto.com/id/1333838449/vector/chatbot-icon-support-bot-cute-smiling-robot-with-headset-the-symbol-of-an-instant-response.jpg?s=612x612&w=0&k=20&c=sJ_uGp9wJ5SRsFYKPwb-dWQqkskfs7Fz5vCs2w5w950=');"></div>
             <div class="message"></div>
         </div>
     `);
     $chatOutput.append($botMessage);
-
-    // Gọi typeMessage để hiển thị từng từ của câu trả lời
     typeMessage($botMessage.find(".message"), formattedAnswer, () => {
-        // Sau khi hoàn thành việc hiển thị câu trả lời, gọi hàm hiển thị tài liệu liên quan
-        displayRelevantDocuments(lst_Relevant_Documents);
+        // Hiển thị lại trích dẫn dạng collapsible bên dưới khung chat
+        if (lst_Relevant_Documents && lst_Relevant_Documents.length > 0) {
+            displayRelevantDocuments(lst_Relevant_Documents);
+        } else {
+            $('#relevant-documents-container').empty();
+        }
+        // Xóa nút nổi nếu còn sót lại
+        $('#show-references-btn').remove();
+        $('.references-overlay').remove();
     });
 }
 
 // Hàm cho chatbot in ra phản hồi cho user
 function typeMessage($element, message, callback) {
-    const words = message.split(" ");
-    let index = 0;
+    // Tách message thành từng từ, nhưng vẫn giữ <br> là một phần riêng biệt
+    const parts = message.split(/(<br>)/g);
+    let words = [];
+    parts.forEach(part => {
+        if (part === "<br>") {
+            words.push("<br>");
+        } else {
+            // Tách từng từ, giữ nguyên HTML
+            const splitWords = part.split(" ");
+            splitWords.forEach((w, i) => {
+                // Đảm bảo không thêm từ rỗng cuối cùng do split
+                if (w !== "" || i < splitWords.length - 1) words.push(w);
+            });
+        }
+    });
 
-    isTyping = true; // Bắt đầu trạng thái gõ
-    updateSendButtonState(); // Vô hiệu hóa nút Send khi chatbot đang gõ
+    let wordIndex = 0;
+    isTyping = true;
+    updateSendButtonState();
 
     const interval = setInterval(() => {
-        if (index < words.length) {
-            $element.append(words[index] + " ");
-            index++;
+        if (wordIndex < words.length) {
+            if (words[wordIndex] === "<br>") {
+                $element.append("<br>");
+            } else {
+                // Nếu từ tiếp theo là <br> hoặc là từ cuối, không thêm dấu cách
+                const addSpace = (wordIndex < words.length - 1 && words[wordIndex + 1] !== "<br>");
+                $element.append(words[wordIndex] + (addSpace ? " " : ""));
+            }
+            wordIndex++;
             $element.parent().scrollTop($element.parent().prop('scrollHeight'));
         } else {
             clearInterval(interval);
-            isTyping = false; // Kết thúc trạng thái gõ
-            updateSendButtonState(); // Cập nhật trạng thái nút Send sau khi hoàn thành
-            if (callback) callback(); // Gọi callback sau khi in xong
+            isTyping = false;
+            updateSendButtonState();
+            if (callback) callback();
         }
-    }, 25); // Điều chỉnh tốc độ gõ chữ (25ms mỗi từ)
+    }, 25);
 }
 
 // Hàm tạo thẻ cho lst_Relevant_Documents
@@ -195,86 +306,128 @@ function displayRelevantDocuments(documents) {
     const container = $('#relevant-documents-container');
     container.empty(); // Xóa các thẻ cũ nếu có
 
-    // Tạo div chứa tiêu đề
-    const title = $('<div class="references-title">Trích dẫn tham khảo</div>');
-    container.append(title);
+    // Giới hạn số lượng trích dẫn tối đa là 5
+    const maxReferences = 5;
+    const displayDocs = documents.slice(0, maxReferences);
+    const count = displayDocs.length;
+    let badgeClass = '';
+    if (count >= 5) badgeClass = 'red';
+    else if (count >= 3) badgeClass = 'orange';
+    else badgeClass = '';
 
-    // Tạo một div riêng cho các thẻ tài liệu
-    const documentsWrapper = $('<div class="documents-wrapper"></div>');
-    container.append(documentsWrapper);
+    // Tạo header (dạng button) để mở modal
+    const header = $(`
+        <div class="references-collapsible-header" style="cursor:pointer;">
+            <span class="references-collapsible-arrow">▶</span>
+            <span>Trích dẫn tham khảo</span>
+            <span class="references-collapsible-badge ${badgeClass}">${count}</span>
+        </div>
+    `);
+    container.append(header);
 
+    // Khi click header, hiện modal overlay
+    header.on('click', function() {
+        showReferencesModal(displayDocs);
+    });
+}
+
+// Hàm hiện modal overlay chứa các thẻ trích dẫn
+function showReferencesModal(documents) {
+    // Xóa overlay cũ nếu có
+    $('.references-modal-overlay').remove();
+    const overlay = $(`
+        <div class="references-modal-overlay">
+            <div class="references-modal-popup">
+                <div class="references-modal-title">📑 Trích dẫn tham khảo (${documents.length})</div>
+                <button class="references-modal-close" title="Đóng">×</button>
+                <div class="documents-wrapper"></div>
+            </div>
+        </div>
+    `);
+    // Thêm các thẻ trích dẫn vào popup
+    const documentsWrapper = overlay.find('.documents-wrapper');
     documents.forEach((doc, index) => {
-        // // Giới hạn nội dung hiển thị (ví dụ: 100 ký tự đầu tiên)
-        // const shortContent = doc.length > 100 ? doc.substring(0, 100) + '...' : doc;
-
-        // // Tạo thẻ cho document
-        // const docElement = $(`
-        //     <div class="relevant-document" data-full-content="${doc}">
-        //         ${shortContent}
-        //     </div>
-        // `);
-
-        // Lấy phần metadata từ chuỗi trích dẫn tài liệu
+        if (typeof doc === 'string' && doc.startsWith('http')) {
+            const docElement = $(`
+                <div class="relevant-document">
+                    <span class="doc-icon">🔗</span>
+                    <div class="doc-title">Link tham khảo</div>
+                    <div class="doc-content"><a href="${doc}" target="_blank" rel="noopener noreferrer">${doc}</a></div>
+                </div>`
+            );
+            documentsWrapper.append(docElement);
+            return;
+        }
         const parts = doc.split('<=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=>');
-
-        // Kiểm tra nếu có ít nhất hai phần (metadata và nội dung)
         if (parts.length > 1) {
-            const contentPart = parts[1].trim(); // Metadata phần đầu tiên
-            const metadataPart = parts[0].trim();  // Nội dung tài liệu phần thứ hai
-
-            // Trích xuất thông tin từ metadata, ví dụ: 'loai_van_ban' và 'so_hieu'
+            const contentPart = parts[1].trim();
+            const metadataPart = parts[0].trim();
             const loaiVanBanMatch = metadataPart.match(/Loại văn bản: (.*)/);
             const soHieuMatch = metadataPart.match(/Số hiệu: (.*)/);
-
-            // Lấy thông tin từ các nhóm đã trích xuất
             const loaiVanBan = loaiVanBanMatch ? loaiVanBanMatch[1] : "N/A";
             const soHieu = soHieuMatch ? soHieuMatch[1] : "N/A";
-
-            // Giới hạn nội dung hiển thị (ví dụ: 20 ký tự đầu tiên)
-            const shortContent = contentPart.length > 20 ? contentPart.substring(0, 20) + '...' : contentPart;
-
-            // Tạo nội dung thẻ tài liệu mới
+            const shortContent = contentPart.length > 40 ? contentPart.substring(0, 40) + '...' : contentPart;
             const docElement = $(`
                 <div class="relevant-document" data-full-content="${doc}">
-                    ${loaiVanBan} ${soHieu}
-                    <hr class="custom-hr">
-                    ${shortContent}
-                </div>
-            `);
-
-            // Thêm sự kiện click để mở rộng nội dung đầy đủ
-            docElement.on('click', function() {
+                    <span class="doc-icon">📄</span>
+                    <div class="doc-title">${loaiVanBan} ${soHieu}</div>
+                    <div class="doc-content">${shortContent}</div>
+                </div>`
+            );
+            docElement.on('click', function(e) {
+                e.stopPropagation();
                 const fullContent = $(this).data('full-content');
                 openFullscreenDocument(fullContent);
             });
-
             documentsWrapper.append(docElement);
         }
     });
+    // Sự kiện đóng overlay
+    overlay.find('.references-modal-close').on('click', function() {
+        overlay.remove();
+    });
+    overlay.on('click', function(e) {
+        if ($(e.target).is('.references-modal-overlay')) {
+            overlay.remove();
+        }
+    });
+    $('body').append(overlay);
 }
 
 // Hàm mở nội dung đầy đủ khi click vào Trích dẫn
 function openFullscreenDocument(content) {
-    // Thay thế ký tự xuống dòng bằng thẻ <br> để hiển thị cách dòng đúng
-    const formattedContent = content.replace(/\n/g, "<br>");
+    // Tách phần metadata và phần nội dung
+    const parts = content.split('<=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=>');
+    let metadata = parts[0] || '';
+    let mainContent = parts[1] || '';
 
-    // Tạo overlay để hiển thị nội dung phóng to
-    const overlay = $(`
-        <div class="fullscreen-overlay">
+    // Xử lý metadata: chỉ thay \n thành <br>
+    metadata = metadata.replace(/\n/g, "<br>");
+
+    // Xử lý mainContent:
+    // 1. Thay \n thành <br>
+    mainContent = mainContent.replace(/\n/g, "<br>");
+    // 2. Chèn <br> trước mọi số thứ tự (1., 2., ...)
+    mainContent = mainContent.replace(/(\d+\.\s)/g, '<br>$1');
+    mainContent = mainContent.replace(/^<br>/, "");
+
+    // Ghép lại
+    let formattedContent = metadata + '<br><b><=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=></b><br>' + mainContent;
+
+    const overlay = $(
+        `<div class="fullscreen-overlay">
             <div class="fullscreen-document">
                 <div class="document-content">${formattedContent}</div>
             </div>
-        </div>
-    `);
+        </div>`
+    );
 
-    // Thêm sự kiện click vào overlay để đóng khi nhấp ra bên ngoài tài liệu
     overlay.on('click', function(e) {
         if ($(e.target).is('.fullscreen-overlay')) {
-            overlay.remove(); // Đóng overlay khi click vào vùng tối
+            overlay.remove();
         }
     });
 
-    // Thêm overlay vào body
     $('body').append(overlay);
 }
 
@@ -297,11 +450,16 @@ function startNewSession() {
             $('#relevant-documents-container').empty();
             const defaultMessage = `
                 <div class="chat-message bot">
-                    <div class="avatar bot-avatar" style="background-image: url('https://png.pngtree.com/png-vector/20230225/ourmid/pngtree-smart-chatbot-cartoon-clipart-png-image_6620453.png');"></div>
+                    <div class="avatar bot-avatar" style="background-image: url('https://media.istockphoto.com/id/1333838449/vector/chatbot-icon-support-bot-cute-smiling-robot-with-headset-the-symbol-of-an-instant-response.jpg?s=612x612&w=0&k=20&c=sJ_uGp9wJ5SRsFYKPwb-dWQqkskfs7Fz5vCs2w5w950=');"></div>
                     <div class="message">Xin chào Bạn, Tôi là một trợ lý chuyên hỗ trợ về pháp luật Việt Nam. Bạn có câu hỏi gì xin đừng ngần ngại hỏi Tôi nhé!</div>
                 </div>
             `;
             $('#chat-output').append(defaultMessage);
+            // Reset về chế độ chat thường khi new chat
+            isSearchWebMode = false;
+            $('#toggle-search-web').removeClass('active').find('span').text('Chat');
+            $('#user-query').attr('placeholder', 'Nhập tin nhắn ...');
+            updateSearchWebButtonState(); // Enable Search Web button
         },
         error: function () {
             alert("Error: Unable to start new session.");
@@ -329,7 +487,12 @@ $('#new-chat').on('click', function (event) {
 });
 
 // Hàm lưu tin nhắn vào database
-function saveMessage(sessionId, sender, message) {
+function saveMessage(sessionId, sender, message, references = null) {
+    // Xử lý trường hợp references là chuỗi rỗng
+    if (references === "") {
+        references = [];
+    }
+    
     $.ajax({
         url: 'http://127.0.0.1:8000/api/session/save-message',
         type: 'POST',
@@ -337,13 +500,14 @@ function saveMessage(sessionId, sender, message) {
         data: JSON.stringify({
             session_id: sessionId,
             sender: sender,
-            message: message
+            message: message,
+            references: references
         }),
         success: function(response) {
             console.log("Message saved:", response);
         },
-        error: function() {
-            console.error("Error saving message.");
+        error: function(xhr) {
+            console.error("Error saving message:", xhr.responseText);
         }
     });
 }
@@ -365,15 +529,53 @@ function loadChatSessions() {
                     ? firstMessage.substring(0, 30) + "..." 
                     : firstMessage;
 
-                const sessionElement = $(`
-                    <div class="chat-session" data-session-id="${session.id}">
+                // Thêm icon ba chấm và menu Delete
+                const sessionElement = $(
+                    `<div class="chat-session" data-session-id="${session.id}">
                         <div class="chat-session-content">${truncatedMessage}</div>
-                    </div>
-                `);
+                        <div class="session-menu-trigger">⋯</div>
+                        <div class="session-menu">
+                            <div class="session-menu-item delete-session">
+                                <svg class="delete-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24"><path fill="#d00" d="M9 3a3 3 0 0 1 6 0h5a1 1 0 1 1 0 2h-1v15a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V5H4a1 1 0 1 1 0-2h5Zm8 2H7v15a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V5Zm-5 3a1 1 0 0 1 1 1v8a1 1 0 1 1-2 0V9a1 1 0 0 1 1-1Zm4 1a1 1 0 0 1 2 0v8a1 1 0 1 1-2 0V9Zm-8 0a1 1 0 0 1 2 0v8a1 1 0 1 1-2 0V9Z"/></svg>
+                                Delete
+                            </div>
+                        </div>
+                    </div>`
+                );
 
-                // Gắn sự kiện click để load lịch sử chat
-                sessionElement.on('click', function() {
+                // Gắn sự kiện click để load lịch sử chat cho toàn bộ thẻ (trừ icon ba chấm và menu)
+                sessionElement.on('click', function(e) {
+                    // Nếu click vào menu hoặc icon ba chấm thì không load
+                    if ($(e.target).hasClass('session-menu-trigger') || $(e.target).closest('.session-menu').length) return;
                     loadChatHistory(session.id);
+                });
+
+                // Hiện menu khi click vào ba chấm
+                sessionElement.find('.session-menu-trigger').on('click', function(e) {
+                    e.stopPropagation();
+                    const $menu = $(this).siblings('.session-menu');
+                    // Nếu menu đang hiện, ẩn nó đi. Nếu đang ẩn, ẩn tất cả menu khác và hiện menu này.
+                    if ($menu.is(':visible')) {
+                        $menu.hide();
+                    } else {
+                        $('.session-menu').hide();
+                        $menu.show();
+                    }
+                });
+
+                // Ẩn menu khi click ra ngoài
+                $(document).on('click', function() {
+                    $('.session-menu').hide();
+                });
+
+                // Xử lý xóa phiên chat
+                sessionElement.find('.delete-session').on('click', function(e) {
+                    e.stopPropagation();
+                    if (confirm('Bạn có chắc chắn muốn xóa phiên chat này?')) {
+                        const sessionId = session.id;
+                        deleteChatSession(sessionId); // Gọi hàm xóa phiên chat
+                        sessionElement.remove(); // Xóa khỏi giao diện
+                    }
                 });
 
                 $chatSessions.append(sessionElement);
@@ -413,9 +615,44 @@ $('.chat-session').on('click', function() {
     updateClearChatButtonState();
 });
 
+// Hàm load tài liệu tham khảo cho một tin nhắn
+function loadMessageReferences(messageId) {
+    // Xóa class selected từ tất cả tin nhắn bot
+    $('.chat-message.bot').removeClass('selected');
+    
+    // Thêm class selected cho tin nhắn được click
+    $(`.chat-message.bot[data-message-id="${messageId}"]`).addClass('selected');
+
+    $.ajax({
+        url: `http://127.0.0.1:8000/api/session/get-message-references/${messageId}`,
+        type: 'GET',
+        contentType: 'application/json',
+        success: function(response) {
+            if (response.references && response.references.length > 0) {
+                displayRelevantDocuments(response.references);
+            } else {
+                $('#relevant-documents-container').empty();
+            }
+        },
+        error: function() {
+            console.error("Error loading message references.");
+        }
+    });
+}
+
 // Hàm load lại lịch sử chat của một phiên
 function loadChatHistory(sessionId) {
     console.log("Loading chat history for session ID:", sessionId);
+
+    // Xóa phần trích dẫn tham khảo khi load lịch sử chat
+    $('#relevant-documents-container').empty();
+
+    // Xóa class selected từ tất cả các phiên chat và tin nhắn bot
+    $('.chat-session').removeClass('selected');
+    $('.chat-message.bot').removeClass('selected');
+    
+    // Thêm class selected cho phiên chat được chọn
+    $(`.chat-session[data-session-id="${sessionId}"]`).addClass('selected');
 
     // Gọi API để lấy lịch sử chat
     $.ajax({
@@ -425,22 +662,23 @@ function loadChatHistory(sessionId) {
         success: function (response) {
             const chatHistory = response.chat_history;
             const $chatOutput = $('#chat-output');
-            $chatOutput.empty(); // Xóa khung chat hiện tại
+            $chatOutput.empty();
 
             // Duyệt qua lịch sử chat và hiển thị từng tin nhắn
             chatHistory.forEach(chat => {
                 const isBot = chat.sender === 'bot';
                 
-                // Chuyển các đoạn có dấu ** thành thẻ <strong> để in đậm
-                let formattedMessage = chat.message.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-                // Thay thế \n bằng <br> để hiển thị xuống dòng
-                formattedMessage = formattedMessage.replace(/\n/g, "<br>");
+                let formattedMessage = chat.message
+                    .replace(/\\n\\n/g, "<br><br>")
+                    .replace(/\\n/g, "<br>")
+                    .replace(/\n\n/g, "<br><br>")
+                    .replace(/\n/g, "<br>")
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
                 const messageHtml = `
-                    <div class="chat-message ${isBot ? 'bot' : 'user'}">
+                    <div class="chat-message ${isBot ? 'bot' : 'user'}" data-message-id="${chat.id}">
                         <div class="avatar ${isBot ? 'bot-avatar' : 'user-avatar'}" 
-                             style="background-image: url('${isBot ? 'https://png.pngtree.com/png-vector/20230225/ourmid/pngtree-smart-chatbot-cartoon-clipart-png-image_6620453.png' : 'https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o='}');">
+                             style="background-image: url('${isBot ? 'https://media.istockphoto.com/id/1333838449/vector/chatbot-icon-support-bot-cute-smiling-robot-with-headset-the-symbol-of-an-instant-response.jpg?s=612x612&w=0&k=20&c=sJ_uGp9wJ5SRsFYKPwb-dWQqkskfs7Fz5vCs2w5w950=' : 'https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o='}');">
                         </div>
                         <div class="message">${formattedMessage}</div>
                     </div>
@@ -448,17 +686,21 @@ function loadChatHistory(sessionId) {
                 $chatOutput.append(messageHtml);
             });
 
-            const $inputArea = $('#user-query');  // Sử dụng id 'user-query' thay vì class 'input-area'
-            // Vô hiệu hóa input và thay đổi placeholder
-            $inputArea.prop('disabled', false);  // Mở input
-            $inputArea.attr('placeholder', 'Nhập tin nhắn ...');  // Thay đổi placeholder
+            // Thêm sự kiện click cho tin nhắn của bot
+            $('.chat-message.bot').on('click', function() {
+                const messageId = $(this).data('message-id');
+                loadMessageReferences(messageId);
+            });
 
-            // Sau khi tải xong lịch sử chat, cập nhật trạng thái nút Clear Chat
+            const $inputArea = $('#user-query');
+            $inputArea.prop('disabled', false);
+            $inputArea.attr('placeholder', 'Nhập tin nhắn ...');
+
             updateClearChatButtonState();
 
-            // Cập nhật session ID hiện tại
             currentSessionId = sessionId;
-            localStorage.setItem('session_id', sessionId); // Lưu lại session ID
+            localStorage.setItem('session_id', sessionId);
+            updateSearchWebButtonState(); // Enable Search Web button
         },
         error: function () {
             console.error("Error loading chat history.");
@@ -525,6 +767,15 @@ function deleteChatSession(sessionId) {
             console.log('Session deleted successfully');
             // Cập nhật lại danh sách các phiên chat trong sidebar
             loadChatSessions();
+            // Nếu đang ở phiên chat bị xóa thì clear chat và disable input
+            if (currentSessionId === sessionId) {
+                $('#chat-output').empty();
+                $('#relevant-documents-container').empty();
+                const $inputArea = $('#user-query');
+                $inputArea.prop('disabled', true);
+                $inputArea.attr('placeholder', 'Click "Đoạn Chat Mới" để bắt đầu một phiên trò chuyện mới!');
+                $('#send-button').prop('disabled', true).removeClass('active').addClass('disabled');
+            }
         },
         error: function() {
             console.error("Error deleting session.");
@@ -532,3 +783,87 @@ function deleteChatSession(sessionId) {
     });
 }
 
+// Hàm tạo/hiện nút nổi xem trích dẫn
+function showReferencesButton(documents) {
+    // Xóa nút cũ nếu có
+    $('#show-references-btn').remove();
+    if (!documents || documents.length === 0) return;
+    // Tạo nút nổi
+    const btn = $(`
+        <button id="show-references-btn" class="highlight" title="Xem trích dẫn tham khảo">
+            📑 Trích dẫn
+            <span class="badge">${documents.length}</span>
+        </button>
+    `);
+    $('body').append(btn);
+    // Hiệu ứng nổi bật trong 2s đầu
+    setTimeout(() => btn.removeClass('highlight'), 2000);
+    // Sự kiện click để mở overlay
+    btn.on('click', function() {
+        showReferencesOverlay(documents);
+    });
+}
+
+// Hàm hiện overlay pop-up chứa các thẻ trích dẫn
+function showReferencesOverlay(documents) {
+    // Xóa overlay cũ nếu có
+    $('.references-overlay').remove();
+    // Tạo overlay
+    const overlay = $(`
+        <div class="references-overlay">
+            <div class="references-popup">
+                <div class="references-popup-title">📑 Trích dẫn tham khảo (${documents.length})</div>
+                <button class="references-popup-close" title="Đóng">×</button>
+                <div class="documents-wrapper"></div>
+            </div>
+        </div>
+    `);
+    // Thêm các thẻ trích dẫn vào popup
+    const documentsWrapper = overlay.find('.documents-wrapper');
+    documents.forEach((doc, index) => {
+        if (typeof doc === 'string' && doc.startsWith('http')) {
+            const docElement = $(`
+                <div class="relevant-document">
+                    <span class="doc-icon">🔗</span>
+                    <div class="doc-title">Link tham khảo</div>
+                    <div class="doc-content"><a href="${doc}" target="_blank" rel="noopener noreferrer">${doc}</a></div>
+                </div>`
+            );
+            documentsWrapper.append(docElement);
+            return;
+        }
+        const parts = doc.split('<=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=>');
+        if (parts.length > 1) {
+            const contentPart = parts[1].trim();
+            const metadataPart = parts[0].trim();
+            const loaiVanBanMatch = metadataPart.match(/Loại văn bản: (.*)/);
+            const soHieuMatch = metadataPart.match(/Số hiệu: (.*)/);
+            const loaiVanBan = loaiVanBanMatch ? loaiVanBanMatch[1] : "N/A";
+            const soHieu = soHieuMatch ? soHieuMatch[1] : "N/A";
+            const shortContent = contentPart.length > 40 ? contentPart.substring(0, 40) + '...' : contentPart;
+            const docElement = $(`
+                <div class="relevant-document" data-full-content="${doc}">
+                    <span class="doc-icon">📄</span>
+                    <div class="doc-title">${loaiVanBan} ${soHieu}</div>
+                    <div class="doc-content">${shortContent}</div>
+                </div>`
+            );
+            docElement.on('click', function(e) {
+                e.stopPropagation();
+                const fullContent = $(this).data('full-content');
+                openFullscreenDocument(fullContent);
+            });
+            documentsWrapper.append(docElement);
+        }
+    });
+    // Sự kiện đóng overlay
+    overlay.find('.references-popup-close').on('click', function() {
+        overlay.remove();
+    });
+    overlay.on('click', function(e) {
+        if ($(e.target).is('.references-overlay')) {
+            overlay.remove();
+        }
+    });
+    $('body').append(overlay);
+}
