@@ -1,0 +1,22 @@
+{"time":"2025-04-13T04:37:44.611638651Z","level":"INFO","msg":"using version","core version":"0.18.3"}
+{"time":"2025-04-13T04:37:44.611667243Z","level":"INFO","msg":"created symlink","path":"/kaggle/working/wandb/run-20250413_043744-cxervs0h/logs/debug-core.log"}
+{"time":"2025-04-13T04:37:46.613328817Z","level":"ERROR","msg":"dialing: google: could not find default credentials. See https://cloud.google.com/docs/authentication/external/set-up-adc for more information"}
+{"time":"2025-04-13T04:37:46.617896149Z","level":"INFO","msg":"created new stream","id":"cxervs0h"}
+{"time":"2025-04-13T04:37:46.617941125Z","level":"INFO","msg":"stream: started","id":"cxervs0h"}
+{"time":"2025-04-13T04:37:46.617965044Z","level":"INFO","msg":"writer: Do: started","stream_id":{"value":"cxervs0h"}}
+{"time":"2025-04-13T04:37:46.617991956Z","level":"INFO","msg":"sender: started","stream_id":{"value":"cxervs0h"}}
+{"time":"2025-04-13T04:37:46.61802014Z","level":"INFO","msg":"handler: started","stream_id":{"value":"cxervs0h"}}
+{"time":"2025-04-13T04:37:46.922418412Z","level":"INFO","msg":"wandb-core","!BADKEY":null}
+{"time":"2025-04-13T04:37:46.924740996Z","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-04-13T06:32:17.626055392Z","level":"INFO","msg":"api: retrying error","error":"Post \"https://api.wandb.ai/graphql\": read tcp 172.19.2.2:47064->35.186.228.49:443: read: connection reset by peer"}
+{"time":"2025-04-13T10:36:58.202107899Z","level":"INFO","msg":"stream: closing","id":"cxervs0h"}
+{"time":"2025-04-13T10:36:58.202159698Z","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-04-13T10:36:58.210333473Z","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-04-13T10:36:58.278013439Z","level":"WARN","msg":"No job ingredients found, not creating job artifact"}
+{"time":"2025-04-13T10:36:58.278030223Z","level":"WARN","msg":"No source type found, not creating job artifact"}
+{"time":"2025-04-13T10:36:58.278036321Z","level":"INFO","msg":"sender: sendDefer: no job artifact to save"}
+{"time":"2025-04-13T10:36:58.636629309Z","level":"INFO","msg":"fileTransfer: Close: file transfer manager closed"}
+{"time":"2025-04-13T10:36:58.720726587Z","level":"INFO","msg":"handler: closed","stream_id":{"value":"cxervs0h"}}
+{"time":"2025-04-13T10:36:58.720762042Z","level":"INFO","msg":"writer: Close: closed","stream_id":{"value":"cxervs0h"}}
+{"time":"2025-04-13T10:36:58.720773399Z","level":"INFO","msg":"sender: closed","stream_id":{"value":"cxervs0h"}}
+{"time":"2025-04-13T10:36:58.720826678Z","level":"INFO","msg":"stream: closed","id":"cxervs0h"}
