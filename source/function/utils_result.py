@@ -51,16 +51,14 @@ class RAG():
         check=self.generate.classify_query(user_Query)
         if  check==0:
                 context=search_from_json(self.corpus_embedding,self.corpus,user_Query,self.model_embedding)
-                return self.generate.generate_information(user_Query,context),""
+                return self.generate.generate_information(user_Query,context),"", False  # False means don't use web search
         elif check==2:
-                return self.generate.invalid_query(user_Query),""
+                return self.generate.invalid_query(user_Query),"", False  # False means don't use web search
         elif check==1:
             article_documents = self.qdrant_utils.search_With_Similarity_Queries(user_Query)
-            # print("Đã thực hiện xong retrival")
-            # print(f"Số document retrival được {len(article_documents)}")
             rrf_result_docs=self.rerank_utils.reciprocal_rank_fusion(article_documents)
             print(f"Số document khi xoá trùng {len(rrf_result_docs)}")
-            rerank_article_documents = self.rerank_utils.rerank_documents_finetune(user_Query,rrf_result_docs) # .rerank_documents_finetune nếu dùng model 5tune
+            rerank_article_documents = self.rerank_utils.rerank_documents_finetune(user_Query,rrf_result_docs)
             print(f"Số document sau khi qua rerank: {len(rerank_article_documents)}")
             lst_Article_Quote = []
             article_Content_Resuls=[]
@@ -73,7 +71,6 @@ class RAG():
                 answer_result= parse_raw_json(answer_result)
                 selected_keys = answer_result["key"]
                 answer_result = answer_result['answer']
-                # print(answer_result)
                 if selected_keys :
                     selected_documents = [rerank_article_documents[i] for i in selected_keys]
                     lst_Article_Quote = [
@@ -94,9 +91,9 @@ class RAG():
                         """ 
                             for i, ((doc, infor), key) in enumerate(zip(selected_documents,selected_keys))
                         ]
-                else  :
-                     lst_Article_Quote=[]
-                return answer_result, lst_Article_Quote
-            except Exception as e :
+                    return answer_result, lst_Article_Quote, False  # False means don't use web search
+                else:
+                    return "", [], True  # True means use web search
+            except Exception as e:
                 print(e)
-                return "", []
+                return "", [], True  # True means use web search
