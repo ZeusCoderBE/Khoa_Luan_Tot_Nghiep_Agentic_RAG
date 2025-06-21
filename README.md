@@ -67,12 +67,12 @@ The core issues addressed include:
 | Layer                | Technology / Tool                           | Description                                                                                                  |
 | -------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | **Open Model**       | 🤗 HuggingFace Transformers                 | Foundation for models like BERT (extractor), Sentence-Transformers (embedding), and Cross-Encoder (reranker) |
-| **Embedding Engine** | 🧠 Sentence-BERT + Matryoshka Loss          | Generates semantic vector representations for queries and legal passages                                     |
+| **Embedding ** | 🧠 Sentence-BERT + Matryoshka Loss          | Generates semantic vector representations for queries and legal passages                                     |
 | **Reranker**         | 🎯 Cross-Encoder BERT + RRF                 | Re-evaluates the relevance between the query and retrieved passages                                          |
 | **LLM Reasoning**    | 🔮 Gemini API (or local LLM)                | Aggregates context and generates the final legal answer with citations                                       |
 | **Agent Modules**    | 🤖 Query Router, Rewriter, Entity Extractor | Directs the question, rewrites queries, extracts entities (laws, dates, etc.)                                |
 | **Search Engine**    | 🔍 Qdrant + Optional External Tools         | Retrieves vectors and optionally searches external sources (Google, vbpl.gov.vn)                             |
-| **Extractor**        | 🧾 Rule-based & ML-based Parser             | Trích xuất thông tin pháp lý (Điều, Khoản, Mục...) từ văn bản Word hoặc PDF theo cấu trúc chuẩn hóa          |
+| **Extractor**        | 🧾 Extract Information              |         Extract legal answer spans and helps reduce LLM context and API cost      |
 | **Infrastructure**   | ⚙️ FastAPI + Docker + LangChain             | Lightweight backend API, fast deployment, and orchestration of the LLM/RAG pipeline                          |
 | **Deployment**       | ☁️ Containerized microservices              | Easily scalable and deployable as independent services or clusters                                           |
 | **Storage**          | 🧮 Qdrant vector database                   | Stores vectors and metadata, optimized for cosine similarity search                                          |                                    |
