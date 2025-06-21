@@ -1,6 +1,4 @@
-Dưới đây là bản **report dạng chuyên nghiệp** dành cho đề tài: **“Xây dựng hệ thống hỏi đáp pháp luật Việt Nam ứng dụng LLM và kỹ thuật RAG”**, được viết lại dưới góc nhìn của một **Senior AI Engineer** với hơn 10 năm kinh nghiệm, có tính học thuật, hệ thống hóa và định hướng triển khai thực tiễn rõ ràng.
 
----
 
 # 📄 **Technical Report**
 
