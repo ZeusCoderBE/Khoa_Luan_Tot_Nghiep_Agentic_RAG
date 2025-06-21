@@ -2,7 +2,7 @@
 
 # 📄 **Technical Report**
 
-## Legal Advisory Chatbot System: Vietnamese Law QA powered by LLMs & Agentic RAG
+## Legal Retrieval System with Multi Agent System: Vietnamese Law QA powered by LLMs & Agentic RAG
 
 **Author**: Đặng Nguyễn Quang Huy , Huỳnh Gia Hân , Nguyễn Trọng Dũng
 
