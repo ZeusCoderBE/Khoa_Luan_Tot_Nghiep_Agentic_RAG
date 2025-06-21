@@ -59,7 +59,6 @@ The core issues addressed include:
 
 ![AGENTIC_RAG1-Detail_Workflow](https://github.com/user-attachments/assets/69daefa3-937a-4f94-9b6f-9b888051c252)
 
----
 
 ### 3.2 Technical Stack
 
