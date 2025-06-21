@@ -1,4 +1,4 @@
-
+![AGENTIC_RAG1-Detail_Workflow drawio](https://github.com/user-attachments/assets/92ad2bf4-9ce9-4cd0-87d6-6a3d3933f479)
 
 # 📄 **Technical Report**
 
@@ -19,6 +19,10 @@
 ## 1. Executive Summary
 
 This report presents the development and evaluation of a **Legal Advisory Chatbot System** aimed at providing accurate and context-aware responses to Vietnamese legal questions. The system leverages cutting-edge techniques including **LLMs**, **embedding-based vector retrieval**, **fine-tuned reranking**, and an **Agentic RAG pipeline**. The project represents a shift from traditional RAG architectures to more dynamic, modular, and agent-driven retrieval-generation frameworks, optimized for legal domain complexity.
+
+
+![image](https://github.com/user-attachments/assets/05e843fe-0623-4085-b641-e4635fcea3c0)
+
 
 ---
 
@@ -53,7 +57,7 @@ The core issues addressed include:
   * `Search Tool`
   * `Gemini-powered LLM inference module`.
 
-![Uploading AGENTIC_RAG1-Detail_Workflow.drawio.png…]()
+![AGENTIC_RAG1-Detail_Workflow](https://github.com/user-attachments/assets/69daefa3-937a-4f94-9b6f-9b888051c252)
 
 ---
 
