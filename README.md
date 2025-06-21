@@ -18,7 +18,7 @@
 
 ## 1. Executive Summary
 
-This report presents the development and evaluation of a **Legal Advisory Chatbot System** aimed at providing accurate and context-aware responses to Vietnamese legal questions. The system leverages cutting-edge techniques including **LLMs**, **embedding-based vector retrieval**, **fine-tuned reranking**, and an **Agentic RAG pipeline**. The project represents a shift from traditional RAG architectures to more dynamic, modular, and agent-driven retrieval-generation frameworks, optimized for legal domain complexity.
+This report presents the development and evaluation of a **Legal Retrieval System with Multi Agent System** aimed at providing accurate and context-aware responses to Vietnamese legal questions. The system leverages cutting-edge techniques including **LLMs**, **embedding-based vector retrieval**, **fine-tuned reranking**, and an **Agentic RAG pipeline**. The project represents a shift from traditional RAG architectures to more dynamic, modular, and agent-driven retrieval-generation frameworks, optimized for legal domain complexity.
 
 
 ![image](https://github.com/user-attachments/assets/05e843fe-0623-4085-b641-e4635fcea3c0)
@@ -70,7 +70,7 @@ The core issues addressed include:
 | **Reranker**         | 🎯 Cross-Encoder BERT + RRF                 | Re-evaluates the relevance between the query and retrieved passages                                          |
 | **LLM Reasoning**    | 🔮 Gemini API (or local LLM)                | Aggregates context and generates the final legal answer with citations                                       |
 | **Agent Modules**    | 🤖 Query Router, Rewriter, Entity Extractor | Directs the question, rewrites queries, extracts entities (laws, dates, etc.)                                |
-| **Search Engine**    | 🔍 Qdrant + Optional External Tools         | Retrieves vectors and optionally searches external sources (Google, vbpl.gov.vn)                             |
+| **Search**    | 🔍 Qdrant + Optional External Tools         | Retrieves vectors and optionally searches external sources (Google, vbpl.gov.vn)                             |
 | **Extractor**        | 🧾 Extract Information              |         Extract legal answer spans and helps reduce LLM context and API cost      |
 | **Infrastructure**   | ⚙️ FastAPI + Docker + LangChain             | Lightweight backend API, fast deployment, and orchestration of the LLM/RAG pipeline                          |
 | **Deployment**       | ☁️ Containerized microservices              | Easily scalable and deployable as independent services or clusters                                           |
