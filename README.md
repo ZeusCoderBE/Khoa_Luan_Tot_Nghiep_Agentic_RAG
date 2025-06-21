@@ -67,7 +67,7 @@ The core issues addressed include:
 | Layer                | Technology / Tool                           | Description                                                                                                  |
 | -------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | **Open Model**       | 🤗 HuggingFace Transformers                 | Foundation for models like BERT (extractor), Sentence-Transformers (embedding), and Cross-Encoder (reranker) |
-| **Embedding ** | 🧠 Sentence-BERT + Matryoshka Loss          | Generates semantic vector representations for queries and legal passages                                     |
+| **Embedding** | 🧠 Sentence-BERT + Matryoshka Loss          | Generates semantic vector representations for queries and legal passages                                     |
 | **Reranker**         | 🎯 Cross-Encoder BERT + RRF                 | Re-evaluates the relevance between the query and retrieved passages                                          |
 | **LLM Reasoning**    | 🔮 Gemini API (or local LLM)                | Aggregates context and generates the final legal answer with citations                                       |
 | **Agent Modules**    | 🤖 Query Router, Rewriter, Entity Extractor | Directs the question, rewrites queries, extracts entities (laws, dates, etc.)                                |
