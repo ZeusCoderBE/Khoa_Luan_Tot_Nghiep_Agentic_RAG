@@ -5,9 +5,13 @@
 ## Legal Advisory Chatbot System: Vietnamese Law QA powered by LLMs & Agentic RAG
 
 **Author**: Đặng Nguyễn Quang Huy
+
 **Supervised by**: ThS. Trần Trọng Bình
+
 **Institution**: Trường Đại học Sư phạm Kỹ thuật TP.HCM
+
 **Department**: Khoa Công nghệ Thông tin
+
 **Major**: Kỹ thuật Dữ liệu
 
 ---
