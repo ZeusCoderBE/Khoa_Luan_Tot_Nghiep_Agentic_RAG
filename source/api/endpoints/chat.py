@@ -49,11 +49,12 @@ def chatbot_with_search_web(query: ChatbotQuery):
 def chatbot_with_gemini(query: ChatbotQuery):
     try:
         user_input = query.query
-        article_Document_Results, lst_Article_Quote = rag.get_Article_Content_Results(user_input)
+        article_Document_Results, lst_Article_Quote, use_web_search = rag.get_Article_Content_Results(user_input)
         print(user_input)
         return {
             "answer": article_Document_Results,
-            "lst_Relevant_Documents": lst_Article_Quote
+            "lst_Relevant_Documents": lst_Article_Quote,
+            "use_web_search": use_web_search
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing request: {str(e)}")
