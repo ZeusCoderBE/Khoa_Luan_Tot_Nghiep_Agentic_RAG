@@ -53,7 +53,7 @@ The core issues addressed include:
   * `Search Tool`
   * `Gemini-powered LLM inference module`.
 
- ![image](https://github.com/user-attachments/assets/ab0440d0-81cf-4a3b-b43e-9f098c5afa9d)
+![Uploading AGENTIC_RAG1-Detail_Workflow.drawio.png…]()
 
 ---
 
