@@ -42,26 +42,33 @@ The core issues addressed include:
 * **Vector DB**: Qdrant, used to store and retrieve dense document embeddings.
 * **LLM Backbone**: Google BERT fine-tuned for Vietnamese law.
 * **Embedding Model**: Custom Sentence Transformers (`quanghuy123/LEGAL_EMBEDDING`).
-* **Reranker**: Cross-Encoder with Reciprocal Rank Fusion (RRF) strategy.
+* **Reranker**: Cross-Encoder with Reciprocal Rank Fusion (RRF) strategy (`hghaan/rerank_model`).
 * **RAG Architecture**: Agentic RAG integrating:
 
   * `Query Router`
   * `Query Rewriter`
   * `Entity Extractor`
   * `Search + Rerank`
-  * Gemini-powered LLM inference module.
+  * `Search Tool`
+  * `Gemini-powered LLM inference module`.
+
+Here is the fully **English version** of the **Technical Stack (Section 3.2)**:
+
+---
 
 ### 3.2 Technical Stack
 
-| Layer            | Technology/Tool                 |
-| ---------------- | ------------------------------- |
-| Language Model   | HuggingFace Transformers        |
-| Embedding Engine | Sentence-BERT + Matryoshka Loss |
-| Reranker         | Cross-Encoder BERT + RRF        |
-| Infrastructure   | FastAPI + Docker + LangChain    |
-| Deployment       | Containerized microservices     |
-| Storage          | Qdrant vector database          |
-
+| Layer                | Technology / Tool                           | Description                                                                                                  |
+| -------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **Open Model**       | 🤗 HuggingFace Transformers                 | Foundation for models like BERT (extractor), Sentence-Transformers (embedding), and Cross-Encoder (reranker) |
+| **Embedding Engine** | 🧠 Sentence-BERT + Matryoshka Loss          | Generates semantic vector representations for queries and legal passages                                     |
+| **Reranker**         | 🎯 Cross-Encoder BERT + RRF                 | Re-evaluates the relevance between the query and retrieved passages                                          |
+| **LLM Reasoning**    | 🔮 Gemini API (or local LLM)                | Aggregates context and generates the final legal answer with citations                                       |
+| **Agent Modules**    | 🤖 Query Router, Rewriter, Entity Extractor | Directs the question, rewrites queries, extracts entities (laws, dates, etc.)                                |
+| **Search Engine**    | 🔍 Qdrant + Optional External Tools         | Retrieves vectors and optionally searches external sources (Google, vbpl.gov.vn)                             |
+| **Infrastructure**   | ⚙️ FastAPI + Docker + LangChain             | Lightweight backend API, fast deployment, and orchestration of the LLM/RAG pipeline                          |
+| **Deployment**       | ☁️ Containerized microservices              | Easily scalable and deployable as independent services or clusters                                           |
+| **Storage**          | 🧮 Qdrant vector database                   | Stores vectors and metadata, optimized for cosine similarity search                                          |
 ---
 
 ## 4. Methodology & Model Optimization
@@ -90,9 +97,9 @@ The core issues addressed include:
 | Module         | Technique                     | Evaluation Score    |
 | -------------- | ----------------------------- | ------------------- |
 | BERT Extractor | Full & LoRA Fine-Tuning       | F1: 0.93, EM: 0.91  |
-| Embedding      | SBERT + Matryoshka            | NDCG\@10: 0.82      |
+| Embedding      | SBERT + Matryoshka            | NDCG\@10: 0.92      |
 | Reranker       | Cross-Encoder + RRF           | MRR\@10: 0.87       |
-| Full System    | Agentic RAG (w/ Gemini Agent) | Query Accuracy: 92% |
+| Full System    | Agentic RAG (w/ Gemini Agent) | Query Accuracy: 90% |
 
 > The system was evaluated on both internal UTE\_LAW and Zalo-based legal QA datasets (2021). Benchmarks confirm the superiority of Agentic RAG over Naive/Traditional RAG in both reasoning depth and retrieval accuracy.
 
