@@ -4,7 +4,7 @@
 
 ## Legal Advisory Chatbot System: Vietnamese Law QA powered by LLMs & Agentic RAG
 
-**Author**: Đặng Nguyễn Quang Huy
+**Author**: Đặng Nguyễn Quang Huy , Huỳnh Gia Hân , Nguyễn Trọng Dũng
 
 **Supervised by**: ThS. Trần Trọng Bình
 
