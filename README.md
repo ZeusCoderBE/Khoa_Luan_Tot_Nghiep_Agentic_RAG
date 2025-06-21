@@ -89,7 +89,12 @@ The core issues addressed include:
 * Fine-tuned Cross-Encoder with labeled question-document pairs.
 * Integrated **RRF** to balance multiple retrieval scores.
 
-### 4.3 Agentic RAG Pipeline
+### 4.3. Extractor
+
+* Fine-tuned BERT to extract legal answer spans
+* Helps reduce LLM context and API cost
+
+### 4.4 Agentic RAG Pipeline
 
 * Dynamically routes queries to appropriate modules.
 * Enables **multi-hop reasoning**, **context rewriting**, and **document grounding**.
