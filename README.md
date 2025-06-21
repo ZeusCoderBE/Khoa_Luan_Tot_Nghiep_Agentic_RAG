@@ -63,6 +63,7 @@ The core issues addressed include:
 
 ### 3.2 Technical Stack
 
+
 | Layer                | Technology / Tool                           | Description                                                                                                  |
 | -------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | **Open Model**       | 🤗 HuggingFace Transformers                 | Foundation for models like BERT (extractor), Sentence-Transformers (embedding), and Cross-Encoder (reranker) |
@@ -71,9 +72,10 @@ The core issues addressed include:
 | **LLM Reasoning**    | 🔮 Gemini API (or local LLM)                | Aggregates context and generates the final legal answer with citations                                       |
 | **Agent Modules**    | 🤖 Query Router, Rewriter, Entity Extractor | Directs the question, rewrites queries, extracts entities (laws, dates, etc.)                                |
 | **Search Engine**    | 🔍 Qdrant + Optional External Tools         | Retrieves vectors and optionally searches external sources (Google, vbpl.gov.vn)                             |
+| **Extractor**        | 🧾 Rule-based & ML-based Parser             | Trích xuất thông tin pháp lý (Điều, Khoản, Mục...) từ văn bản Word hoặc PDF theo cấu trúc chuẩn hóa          |
 | **Infrastructure**   | ⚙️ FastAPI + Docker + LangChain             | Lightweight backend API, fast deployment, and orchestration of the LLM/RAG pipeline                          |
 | **Deployment**       | ☁️ Containerized microservices              | Easily scalable and deployable as independent services or clusters                                           |
-| **Storage**          | 🧮 Qdrant vector database                   | Stores vectors and metadata, optimized for cosine similarity search                                          |
+| **Storage**          | 🧮 Qdrant vector database                   | Stores vectors and metadata, optimized for cosine similarity search                                          |                                    |
 ---
 
 ## 4. Methodology & Model Optimization
