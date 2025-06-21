@@ -36,6 +36,7 @@ The core issues addressed include:
 
 ## 3. System Architecture Overview
 
+
 ### 3.1 Core Components
 
 * **Document Source**: Official Vietnamese legal websites.
@@ -52,7 +53,7 @@ The core issues addressed include:
   * `Search Tool`
   * `Gemini-powered LLM inference module`.
 
-Here is the fully **English version** of the **Technical Stack (Section 3.2)**:
+ ![image](https://github.com/user-attachments/assets/ab0440d0-81cf-4a3b-b43e-9f098c5afa9d)
 
 ---
 
