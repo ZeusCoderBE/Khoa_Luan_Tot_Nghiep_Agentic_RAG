@@ -8,11 +8,11 @@
 
 **Supervised by**: ThS. Trần Trọng Bình
 
-**Institution**: Trường Đại học Sư phạm Kỹ thuật TP.HCM
+**Institution**: Ho Chi Minh City University of Technology and Education
 
-**Department**: Khoa Công nghệ Thông tin
+**Department**:  Faculty of Information Technology
 
-**Major**: Kỹ thuật Dữ liệu
+**Major**: Data Engineering
 
 ---
 
