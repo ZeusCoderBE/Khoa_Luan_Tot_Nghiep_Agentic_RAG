@@ -1,9 +1,10 @@
 ![AGENTIC_RAG1-Detail_Workflow drawio](https://github.com/user-attachments/assets/92ad2bf4-9ce9-4cd0-87d6-6a3d3933f479)
 
+Here is the Demo video: [Legal Retrieval System with Multi Agent System: Vietnamese Law QA powered by LLMs & Agentic RAG](https://youtu.be/v9iN9ebrfx8?si=0QFnMgT6_434TMRK)
+
 # 📄 **Technical Report**
 
 ## Legal Retrieval System with Multi Agent System: Vietnamese Law QA powered by LLMs & Agentic RAG
-
 
 **Author**: We would like to express our sincere gratitude to the team members who contributed their efforts and expertise to this project:
 
