@@ -7,7 +7,7 @@ Here is the Demo video: [Legal Retrieval System with Multi Agent System: Vietnam
 | **Embedding Training**           | [embedding-data-law (Kaggle)](https://www.kaggle.com/datasets/huymeme123/embedding-data-law)|
 | **Extractor Fine-Tuning**        | [extract-data-law (Kaggle)](https://www.kaggle.com/datasets/huymeme123/extract-data-law)|
 | **Supervised Legal QA (Zalo)**   | [vinli-zalo-supervised (Kaggle)](https://www.kaggle.com/datasets/huynhgiahan/vinli-zalo-supervised)|
-
+|  **Data Qdrant**                 | [GOOGLE DRIVER](https://drive.google.com/drive/u/1/folders/1ujLaNsVjbbLXZx3VIWH_vuMF2IeZsWi0I)
 
 
 # 📄 **Technical Report**
