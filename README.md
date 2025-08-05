@@ -17,16 +17,7 @@ Here is the Demo video: [Legal Retrieval System with Multi Agent System: Vietnam
 **Author**: We would like to express our sincere gratitude to the team members who contributed their efforts and expertise to this project:
 
   1. Đặng Nguyễn Quang Huy - [ZeusCoderBE](https://github.com/ZeusCoderBE)
-  2. Huỳnh Gia Hân - [hg27haan](https://github.com/hg27haan)
-  3. Nguyễn Trọng Dũng - [NgTrDung](https://github.com/NgTrDung)
-
-**Supervised by**: ThS. Trần Trọng Bình
-
-**Institution**: Ho Chi Minh City University of Technology and Education
-
-**Department**:  Faculty of Information Technology
-
-**Major**: Data Engineering
+  2. Nguyễn Trọng Dũng - [NgTrDung](https://github.com/NgTrDung)
 
 ---
 
